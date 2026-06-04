@@ -1,71 +1,53 @@
 import { useState, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Polyline, Circle, useMapEvents, useMap } from 'react-leaflet';
+import L from 'leaflet';
 
-// Tüm efsanevi spor anlarının yer aldığı 11 soruluk profesyonel havuz
+// Harita marker'ının Vite üzerinde kırılmasını önlemek için özel parıldayan kırmızı nokta tasarımı
+const customMarkerIcon = L.divIcon({
+  html: `<div style="background-color: #ef4444; width: 14px; height: 14px; border-radius: 50%; border: 2.5px solid white; box-shadow: 0 0 12px #ef4444; position: relative; animation: pulse 1.5s infinite;"></div>
+         <style>
+           @keyframes pulse {
+             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+             70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+           }
+         </style>`,
+  className: 'custom-pin',
+  iconSize: [14, 14],
+  iconAnchor: [7, 7]
+});
 
- const ICONIC_MOMENTS = [
-  // --- KENDİ SEÇTİĞİN 21 ORİJİNAL EFSANE ---
-  { id: 1, sport: "Futbol", title: "Agüerooooo!", hint: "93:20'de gelen tarihi Premier Lig şampiyonluğu golü.", localPhotoUrl: "/sports_photos/aguero.jpg", lat: 53.4831, lng: -2.2004, year: 2012, locationName: "Etihad Stadyumu, Manchester" },
-  { id: 2, sport: "Boks", title: "Ali vs Liston", hint: "Ringin üzerinde yıkılan rakibine bağıran efsane şampiyon.", localPhotoUrl: "/sports_photos/ali.jpg", lat: 44.1014, lng: -70.2148, year: 1965, locationName: "Lewiston, Maine, ABD" },
-  { id: 3, sport: "Atletizm", title: "Bolt'un Gülümsemesi", hint: "Rakiplerine fark atıp bitiş çizgisine bakarak gülümsediği o an.", localPhotoUrl: "/sports_photos/bolt.jpg", lat: -22.8932, lng: -43.2923, year: 2016, locationName: "Olimpiyat Stadyumu, Rio, Brezilya" },
-  { id: 4, sport: "Tenis", title: "Wimbledon Epik Finali", hint: "Karanlık çökerken biten o inanılmaz Federer - Nadal maçı.", localPhotoUrl: "/sports_photos/federer_nadal.jpg", lat: 51.4343, lng: -0.2145, year: 2008, locationName: "Wimbledon, Londra" },
-  { id: 5, sport: "Futbol", title: "İstanbul Mucizesi", hint: "Liverpool'un Milan'a karşı 3-0'dan geri döndüğü unutulmaz gece.", localPhotoUrl: "/sports_photos/istanbul.jpg", lat: 41.0744, lng: 28.7656, year: 2005, locationName: "Atatürk Olimpiyat Stadyumu, İstanbul" },
-  { id: 6, sport: "Basketbol", title: "The Last Shot", hint: "Jordan'ın şut attığı andaki pota arkası seyircilerin tepkisine bak.", localPhotoUrl: "/sports_photos/jordan.jpg", lat: 40.7683, lng: -111.8911, year: 1998, locationName: "Delta Center, Utah" },
-  { id: 7, sport: "Basketbol", title: "Kobe 81 Sayı", hint: "Tarihin en büyük ikinci skor performansının yaşandığı gece.", localPhotoUrl: "/sports_photos/kobe.jpg", lat: 34.0430, lng: -118.2673, year: 2006, locationName: "Staples Center, Los Angeles" },
-  { id: 8, sport: "Basketbol", title: "LeBron'un Bloğu", hint: "Finaller 7. maçında Iguodala'ya yapılan o efsanevi blok.", localPhotoUrl: "/sports_photos/lebron.jpg", lat: 37.7503, lng: -122.2030, year: 2016, locationName: "Oracle Arena, Oakland" },
-  { id: 9, sport: "Futbol", title: "Tanrı'nın Eli", hint: "İngiltere'ye elle atılan o tartışmalı tarihi gol.", localPhotoUrl: "/sports_photos/maradona.jpg", lat: 19.3031, lng: -99.1506, year: 1986, locationName: "Estadio Azteca, Meksika" },
-  { id: 10, sport: "Futbol", title: "Messi'nin Rüyası", hint: "Messi'nin nihayet Dünya Kupası'nı kaldırdığı o unutulmaz Katar gecesi.", localPhotoUrl: "/sports_photos/messi_worldcup.jpg", lat: 25.4208, lng: 51.4903, year: 2022, locationName: "Lusail Stadyumu, Katar" },
-  { id: 11, sport: "Tenis", title: "Toprak Kortun Kralı", hint: "Nadal'ın evi olarak bilinen ve kupaları domine ettiği yer.", localPhotoUrl: "/sports_photos/nadal.jpg", lat: 48.8471, lng: 2.2476, year: 2022, locationName: "Roland Garros, Paris" },
-  { id: 12, sport: "Futbol", title: "Pelé 1970", hint: "Brezilya'nın futbol tarihine geçen o ikonik dünya kupası zaferi.", localPhotoUrl: "/sports_photos/pele_1970.jpg", lat: 19.3031, lng: -99.1506, year: 1970, locationName: "Estadio Azteca, Meksika" },
-  { id: 13, sport: "Yüzme", title: "Phelps'in 8 Altını", hint: "Tek olimpiyatta kırılan o ulaşılamaz altın madalya rekoru.", localPhotoUrl: "/sports_photos/phelps.jpg", lat: 39.9913, lng: 116.3861, year: 2008, locationName: "Water Cube, Pekin, Çin" },
-  { id: 14, sport: "Basketbol", title: "Ray Allen'ın Üçlüğü", hint: "Finaller 6. maçında, Miami'yi ipten alan o meşhur köşe üçlüğü.", localPhotoUrl: "/sports_photos/ray_allen.jpg", lat: 25.7814, lng: -80.1870, year: 2013, locationName: "American Airlines Arena, Miami" },
-  { id: 15, sport: "Futbol", title: "Ronaldo'nun Rövaşatası", hint: "Rakip taraftarların bile ayakta alkışladığı o inanılmaz sıçrama.", localPhotoUrl: "/sports_photos/ronaldo_bicycle.jpg", lat: 45.1095, lng: 7.6413, year: 2018, locationName: "Allianz Stadyumu, Torino" },
-  { id: 16, sport: "Formula 1", title: "Schumacher'in Dönemi", hint: "Ferrari efsanesinin altın yıllarında Japonya'da kazandığı şampiyonluk.", localPhotoUrl: "/sports_photos/schumacher.jpg", lat: 34.8431, lng: 136.5411, year: 2000, locationName: "Suzuka Pisti, Japonya" },
-  { id: 17, sport: "Formula 1", title: "Senna'nın Son Yarışı", hint: "F1 tarihinin en hüzünlü pisti.", localPhotoUrl: "/sports_photos/senna.jpg", lat: 44.3439, lng: 11.7167, year: 1994, locationName: "Imola Pisti, İtalya" },
-  { id: 18, sport: "Golf", title: "Tiger Woods Dönüşü", hint: "Yıllar süren sakatlıklardan sonra gelen o mucizevi Masters zaferi.", localPhotoUrl: "/sports_photos/tiger_woods.jpg", lat: 33.5033, lng: -82.0223, year: 2019, locationName: "Augusta National, Georgia" },
-  { id: 19, sport: "Amerikan Futbolu", title: "Tom Brady 28-3", hint: "Süper Bowl tarihinin en büyük geri dönüşü.", localPhotoUrl: "/sports_photos/tom_brady.jpg", lat: 29.6847, lng: -95.4107, year: 2017, locationName: "NRG Stadyumu, Houston" },
-  { id: 20, sport: "Formula 1", title: "Verstappen Son Tur", hint: "Son yarışın, son turunun, son virajında kazanılan o çılgın şampiyonluk.", localPhotoUrl: "/sports_photos/verstappen.jpg", lat: 24.4672, lng: 54.6031, year: 2021, locationName: "Yas Marina, Abu Dabi" },
-  { id: 21, sport: "Futbol", title: "Zidane'ın Volesi", hint: "Şampiyonlar Ligi finalinde gelişine vurulan o kusursuz sol ayak.", localPhotoUrl: "/sports_photos/zidane.jpg", lat: 55.8257, lng: -4.2520, year: 2002, locationName: "Hampden Park, Glasgow" },
-  
-  // --- SENİN EKLENEN 3 YENİ DRAMATİK OLAY (DOSYA İSİMLERİ BİREBİR AYNI) ---
-  { 
-    id: 22, 
-    sport: "Futbol", 
-    title: "Zidane'ın Kafa Atışı", 
-    hint: "Dünya Kupası finalinde, efsanevi kariyerini kırmızı kartla bitiren o olaylı an.", 
-    localPhotoUrl: "/sports_photos/GettyImages-503368718.jpg.webp", 
-    lat: 52.5147, 
-    lng: 13.2397, 
-    year: 2006, 
-    locationName: "Olympiastadion, Berlin, Almanya" 
-  },
-  { 
-    id: 23, 
-    sport: "Boks", 
-    title: "Tyson'ın Isırığı", 
-    hint: "Mike Tyson'ın ringde Holyfield'ın kulağını ısırdığı ve maçın yarıda kaldığı o çılgın gece.", 
-    localPhotoUrl: "/sports_photos/b109f80f-4e20-4115-b4c6-0f57c67ea0bf_1140x641.jpg", 
-    lat: 36.1147, 
-    lng: -115.1728, 
-    year: 1997, 
-    locationName: "MGM Grand, Las Vegas, ABD" 
-  },
-  { 
-    id: 24, 
-    sport: "Futbol", 
-    title: "Suarez'in Isırığı", 
-    hint: "Uruguaylı forvetin İtalyan savunmacı Chiellini'yi omuzundan ısırdığı o tuhaf an.", 
-    localPhotoUrl: "/sports_photos/3751.webp", 
-    lat: -5.7833, 
-    lng: -35.2167, 
-    year: 2014, 
-    locationName: "Arena das Dunas, Natal, Brezilya" 
-  }
-
+// 24 ADET KUSURSUZ EFSANE SPOR ANI (İSİM: ICONIC_MOMENTS)
+const ICONIC_MOMENTS = [
+  { id: 1, sport: "Basketbol", title: "The Last Shot", hint: "Jordan'ın şut attığı andaki pota arkası seyircilerin tepkisine bak.", localPhotoUrl: "/sports_photos/jordan.jpg", fallbackPhotoUrl: "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=1200", lat: 40.7683, lng: -111.8911, year: 1998, locationName: "Delta Center, Utah" },
+  { id: 2, sport: "Futbol", title: "İstanbul Mucizesi", hint: "Liverpool'un 3-0'dan döndüğü o efsane final.", localPhotoUrl: "/sports_photos/istanbul.jpg", fallbackPhotoUrl: "https://images.unsplash.com/photo-1543351611-58f69d7c1781?w=1200", lat: 41.0744, lng: 28.7656, year: 2005, locationName: "Atatürk Olimpiyat Stadyumu, İstanbul" },
+  { id: 3, sport: "Formula 1", title: "Senna'nın Son Yarışı", hint: "F1 tarihinin en hüzünlü pisti.", localPhotoUrl: "/sports_photos/senna.jpg", fallbackPhotoUrl: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=1200", lat: 44.3439, lng: 11.7167, year: 1994, locationName: "Imola, İtalya" },
+  { id: 4, sport: "Basketbol", title: "Kobe 81 Sayı", hint: "Bir maçta 81 sayı attığı o gece.", localPhotoUrl: "/sports_photos/kobe.jpg", fallbackPhotoUrl: "https://images.unsplash.com/photo-1519766304817-4f37bda74a27?w=1200", lat: 34.0430, lng: -118.2673, year: 2006, locationName: "Crypto.com Arena, Los Angeles" },
+  { id: 5, sport: "Tenis", title: "Wimbledon 2008 Finali", hint: "Federer ve Nadal'ın o epik kucaklaşması.", localPhotoUrl: "/sports_photos/federer_nadal.jpg", fallbackPhotoUrl: "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=1200", lat: 51.4343, lng: -0.2145, year: 2008, locationName: "Wimbledon, Londra" },
+  { id: 6, sport: "Futbol", title: "Maradona Tanrı'nın Eli", hint: "İngiltere'ye elle atılan o tarihi gol.", localPhotoUrl: "/sports_photos/maradona.jpg", fallbackPhotoUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1200", lat: 19.3031, lng: -99.1506, year: 1986, locationName: "Estadio Azteca, Meksika" },
+  { id: 7, sport: "Basketbol", title: "LeBron'un Bloğu", hint: "Cavs'e şampiyonluğu getiren o efsane blok.", localPhotoUrl: "/sports_photos/lebron.jpg", fallbackPhotoUrl: "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=1200", lat: 37.7503, lng: -122.2030, year: 2016, locationName: "Oracle Arena, Oakland" },
+  { id: 8, sport: "Atletizm", title: "Bolt 100m Rekoru", hint: "Bitiş çizgisine doğru gülümsediği o an.", localPhotoUrl: "/sports_photos/bolt.jpg", fallbackPhotoUrl: "https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=1200", lat: -22.8932, lng: -43.2923, year: 2016, locationName: "Rio Olimpiyat Stadı, Brezilya" },
+  { id: 9, sport: "Boks", title: "Ali vs Liston", hint: "Ringin üzerinde yükselen şampiyon.", localPhotoUrl: "/sports_photos/ali.jpg", fallbackPhotoUrl: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=1200", lat: 44.1014, lng: -70.2148, year: 1965, locationName: "Lewiston, ABD" },
+  { id: 10, sport: "Formula 1", title: "Schumacher Şampiyonluğu", hint: "Ferrari ile ilk kez kürsüde.", localPhotoUrl: "/sports_photos/schumacher.jpg", fallbackPhotoUrl: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=1200", lat: 34.8431, lng: 136.5411, year: 2000, locationName: "Suzuka, Japonya" },
+  { id: 11, sport: "Yüzme", title: "Phelps 8 Altın Madalya", hint: "Pekin'de 8. altın madalyayı kazandığı o an.", localPhotoUrl: "/sports_photos/phelps.jpg", fallbackPhotoUrl: "https://images.unsplash.com/photo-1530549388964-5a02e5d070b4?w=1200", lat: 39.9913, lng: 116.3861, year: 2008, locationName: "Water Cube, Pekin" },
+  { id: 12, sport: "Futbol", title: "Suarez'in Isırığı", hint: "Uruguaylı forvetin İtalyan savunmacıyı ısırdığı an.", localPhotoUrl: "/sports_photos/suarez.jpg", fallbackPhotoUrl: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1200", lat: -5.7833, lng: -35.2167, year: 2014, locationName: "Arena das Dunas, Brezilya" },
+  { id: 13, sport: "Futbol", title: "Zidane'ın Kafa Atışı", hint: "Finalde Materazzi'ye atılan kafa.", localPhotoUrl: "/sports_photos/zidane_headbutt.jpg", fallbackPhotoUrl: "https://images.unsplash.com/photo-1522778119020-d0118817730c?w=1200", lat: 52.5147, lng: 13.2397, year: 2006, locationName: "Olympiastadion, Berlin" },
+  { id: 14, sport: "Boks", title: "Tyson'ın Isırığı", hint: "Rakibinin kulağını ısırdığı o gece.", localPhotoUrl: "/sports_photos/tyson.jpg", fallbackPhotoUrl: "https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?w=1200", lat: 36.1147, lng: -115.1728, year: 1997, locationName: "MGM Grand, Las Vegas" },
+  { id: 15, sport: "Futbol", title: "Ronaldinho'nun Bernabeu Gecesi", hint: "Rakiplerin bile alkışladığı performans.", localPhotoUrl: "/sports_photos/ronaldinho.jpg", fallbackPhotoUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1200", lat: 40.4531, lng: -3.6883, year: 2005, locationName: "Bernabeu, Madrid" },
+  { id: 16, sport: "Futbol", title: "Messi'nin İlk Golü", hint: "Barcelona formasıyla atılan ilk resmi gol.", localPhotoUrl: "/sports_photos/messi_debut.jpg", fallbackPhotoUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1200", lat: 41.3809, lng: 2.1228, year: 2005, locationName: "Camp Nou, Barselona" },
+  { id: 17, sport: "Golf", title: "Tiger Woods Masters Dönüşü", hint: "Yıllar sonra gelen o tarihi zafer.", localPhotoUrl: "/sports_photos/tiger_woods.jpg", fallbackPhotoUrl: "https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=1200", lat: 33.5033, lng: -82.0223, year: 2019, locationName: "Augusta National, Georgia" },
+  { id: 18, sport: "Futbol", title: "Pelé'nin Dünya Kupası", hint: "1970'te kazandığı o ikonik kupa.", localPhotoUrl: "/sports_photos/pele_1970.jpg", fallbackPhotoUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1200", lat: -23.5505, lng: -46.6333, year: 1970, locationName: "Azteca, Meksika" },
+  { id: 19, sport: "Futbol", title: "Ronaldo'nun Rövaşatası", hint: "Juventus'a atılan o unutulmaz gol.", localPhotoUrl: "/sports_photos/ronaldo_bicycle.jpg", fallbackPhotoUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1200", lat: 45.1095, lng: 7.6413, year: 2018, locationName: "Allianz Stadium, Torino" },
+  { id: 20, sport: "Amerikan Futbolu", title: "Tom Brady 28-3", hint: "Süper Bowl tarihinin en büyük geri dönüşü.", localPhotoUrl: "/sports_photos/tom_brady.jpg", fallbackPhotoUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1200", lat: 33.7573, lng: -84.3963, year: 2017, locationName: "NRG Stadium, Houston" },
+  { id: 21, sport: "Futbol", title: "Agüerooooo!", hint: "93:20'de gelen şampiyonluk golü.", localPhotoUrl: "/sports_photos/aguero.jpg", fallbackPhotoUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1200", lat: 53.4831, lng: -2.2004, year: 2012, locationName: "Etihad Stadium, Manchester" },
+  { id: 22, sport: "Futbol", title: "Zidane'ın Kafa Atışı", hint: "Dünya Kupası finalinde kariyerini bitiren an.", localPhotoUrl: "/sports_photos/GettyImages-503368718.jpg.webp", fallbackPhotoUrl: "https://images.unsplash.com/photo-1522778119020-d0118817730c?w=1200", lat: 52.5147, lng: 13.2397, year: 2006, locationName: "Olympiastadion, Berlin, Almanya" },
+  { id: 23, sport: "Boks", title: "Tyson'ın Isırığı", hint: "Holyfield'ın kulağını ısırdığı gece.", localPhotoUrl: "/sports_photos/b109f80f-4e20-4115-b4c6-0f57c67ea0bf_1140x641.jpg", fallbackPhotoUrl: "https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?w=1200", lat: 36.1147, lng: -115.1728, year: 1997, locationName: "MGM Grand, Las Vegas, ABD" },
+  { id: 24, sport: "Futbol", title: "Suarez'in Isırığı", hint: "İtalyan savunmacıyı ısırdığı o tuhaf an.", localPhotoUrl: "/sports_photos/3751.webp", fallbackPhotoUrl: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1200", lat: -5.7833, lng: -35.2167, year: 2014, locationName: "Arena das Dunas, Natal, Brezilya" }
 ];
 
 // Dünya haritası için Haversine formülü
 function calculateDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371; // Dünya yarıçapı (km)
+  const R = 6371; 
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
   const a = 
@@ -75,12 +57,25 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
-// Oyuncu rütbesini hesaplayan akıllı algoritma (Prestijli ve resmi ifadeler)
+// Oyuncu rütbesini hesaplayan akıllı algoritma
 function getRank(totalScore) {
-  if (totalScore >= 22000) return { title: "Zamanın Efendisi (Sports Time Lord) 👑", desc: "Olağanüstü bir spor tarihi bilgisi! Tüm detayları, stadyumları ve yılları kusursuz tahmin ettiniz." };
-  if (totalScore >= 15000) return { title: "Efsane Gözlemci (Master Detective) 🕵️‍♂️", desc: "Harika gözlem yeteneği! Fotoğraf kalitesinden ve mimariden doğru yılı başarıyla analiz ettiniz." };
-  if (totalScore >= 7000) return { title: "Yetenekli Muhabir (Scout) 🎤", desc: "Oldukça başarılı bir mücadele. Detaylara hakimsiniz ancak konum ve yıl tahminlerinde küçük sapmalarınız oldu." };
-  return { title: "Çaylak Gözlemci (Rookie) 🔍", desc: "Fena değil ancak detaylara biraz daha odaklanmalı, tribün yapısını ve dönemin dokusunu daha iyi analiz etmelisiniz." };
+  if (totalScore >= 22000) return { title: "Zamanın Efendisi (Sports Time Lord) 👑", desc: "Tebrikler! Spor tarihini saniyesi ve koordinatıyla ezbere biliyorsunuz. Kusursuz bir gözlem yeteneği." };
+  if (totalScore >= 15000) return { title: "Efsane Dedektif (Master Detective) 🕵️‍♂️", desc: "Harika bir performans! Görsel detayları yakalama konusunda üst düzey bir yeteneğe sahipsiniz." };
+  if (totalScore >= 7000) return { title: "Yetenekli Gözlemci (Scout) 🎤", desc: "Başarılı bir mücadele. Detaylara hakimsiniz ancak mesafe tahminlerinde küçük sapmalar yaşadınız." };
+  return { title: "Çaylak Dedektif (Rookie) 🔍", desc: "Daha fazla pratiğe ihtiyacınız var. Fotoğraflardaki mimari ve dönemsel ipuçlarına daha dikkatli odaklanmalısınız." };
+}
+
+// Haritayı tahminden sonra otomatik odaklayan modül
+function MapController({ selected, actual, show }) {
+  const map = useMap();
+  useEffect(() => {
+    if (show && selected && actual) {
+      map.fitBounds([selected, actual], { padding: [50, 50], maxZoom: 6, animate: true, duration: 1.5 });
+    } else if (!show) {
+      map.setView([25, 0], 1, { animate: true });
+    }
+  }, [show, selected, actual, map]);
+  return null;
 }
 
 export default function App() {
@@ -102,42 +97,38 @@ export default function App() {
   const [showWarning, setShowWarning] = useState(null);
   const [showFinalModal, setShowFinalModal] = useState(false);
 
-  // Harita Katmanı (Dark Voyager vs Satellite)
+  // Harita Katmanı
   const [satelliteMode, setSatelliteMode] = useState(false);
 
-  // Leaflet dinamik yükleme durumları
+  // Leaflet Durumları
   const [leafletLoaded, setLeafletLoaded] = useState(false);
   const [mapInstance, setMapInstance] = useState(null);
   const [markerInstance, setMarkerInstance] = useState(null);
   const [polylineInstance, setPolylineInstance] = useState(null);
   const [circleInstance, setCircleInstance] = useState(null);
 
-  // Sesi başlatan Web Audio API Synth sentezleyicisi
   const playSynthSound = (frequency, type = 'sine', duration = 0.15) => {
     try {
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const oscillator = audioCtx.createOscillator();
       const gainNode = audioCtx.createGain();
-
       oscillator.type = type;
       oscillator.frequency.value = frequency;
       gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-
       oscillator.connect(gainNode);
       gainNode.connect(audioCtx.destination);
-
       oscillator.start();
       oscillator.stop(audioCtx.currentTime + duration);
     } catch (e) {
-      console.log("Audio API not supported.");
+      console.log("Audio not supported yet.");
     }
   };
 
-  // Oyun başladığında Fisher-Yates algoritması ile rastgele 5 soru seçme
   const startNewGame = () => {
-    const shuffled = [...ALL_MOMENTS].sort(() => 0.5 - Math.random());
-    const selected = shuffled.slice(0, 5); 
+    // ICONIC_MOMENTS üzerinden rastgele 5 soru seçimi
+    const shuffled = [...ICONIC_MOMENTS].sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, 5);
     setActiveQuestions(selected);
     setCurrentQuestionIndex(0);
     setScore(0);
@@ -149,11 +140,10 @@ export default function App() {
     playSynthSound(600, 'triangle', 0.4);
   };
 
-  // Güvenli Soru Çekme Yapısı (Koruyucu mimari)
-  const currentQuestion = activeQuestions[currentQuestionIndex] || ALL_MOMENTS[0] || {};
+  // Güvenli Soru Çekme Yapısı (Crash Önleyici)
+  const currentQuestion = activeQuestions[currentQuestionIndex] || ICONIC_MOMENTS[0] || {};
   const actualLocation = [currentQuestion.lat || 0, currentQuestion.lng || 0];
 
-  // Çift katmanlı görsel yedekleme kontrolü
   const [imgSrc, setImgSrc] = useState("");
   const [usingFallback, setUsingFallback] = useState(false);
 
@@ -171,7 +161,6 @@ export default function App() {
     }
   };
 
-  // Harita Kütüphanelerini Dinamik Olarak Yükleme
   useEffect(() => {
     if (window.L) {
       setLeafletLoaded(true);
@@ -181,124 +170,64 @@ export default function App() {
     link.rel = 'stylesheet';
     link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
     document.head.appendChild(link);
-
     const script = document.createElement('script');
     script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
     script.onload = () => setLeafletLoaded(true);
     document.head.appendChild(script);
   }, []);
 
-  // Harita Oluşturma ve Yönetme
   useEffect(() => {
     if (!leafletLoaded || !gameStarted || showFinalModal) return;
-
     const mapContainer = document.getElementById('game-map');
     if (!mapContainer) return;
+    if (mapInstance) mapInstance.remove();
 
-    // Eski harita örneğini temizleme
-    if (mapInstance) {
-      mapInstance.remove();
-    }
-
-    // Seçilen harita stilini uygula
     const tileUrl = satelliteMode 
       ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
       : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
-
     const attribution = satelliteMode ? 'Esri' : 'CartoDB';
 
-    const map = window.L.map('game-map', {
-      center: [25, 0],
-      zoom: 1,
-      minZoom: 1,
-      worldCopyJump: true
-    });
-
+    const map = window.L.map('game-map', { center: [25, 0], zoom: 1, minZoom: 1, worldCopyJump: true });
     window.L.tileLayer(tileUrl, { attribution }).addTo(map);
     setMapInstance(map);
 
-    // Harita tıklama olayını dinle
     map.on('click', (e) => {
       if (showAnswer) return;
       playSynthSound(440, 'sine', 0.08);
-      const { lat, lng } = e.latlng;
-      setSelectedLocation([lat, lng]);
+      setSelectedLocation([e.latlng.lat, e.latlng.lng]);
     });
 
-    return () => {
-      map.off('click');
-    };
+    return () => map.off('click');
   }, [leafletLoaded, gameStarted, satelliteMode, showFinalModal]);
 
-  // Marker ve Çizgileri Dinamik Olarak Güncelleme
   useEffect(() => {
     if (!mapInstance || !window.L) return;
-
-    // Eski marker'ları temizleme
     if (markerInstance) mapInstance.removeLayer(markerInstance);
     if (polylineInstance) mapInstance.removeLayer(polylineInstance);
     if (circleInstance) mapInstance.removeLayer(circleInstance);
 
     if (selectedLocation) {
-      // Parıldayan modern marker tasarımı
-      const pinIcon = window.L.divIcon({
-        html: `<div style="background-color: #ef4444; width: 14px; height: 14px; border-radius: 50%; border: 2.5px solid white; box-shadow: 0 0 12px #ef4444; position: relative;"></div>`,
-        className: 'custom-pin',
-        iconSize: [14, 14],
-        iconAnchor: [7, 7]
-      });
-
-      const newMarker = window.L.marker(selectedLocation, { icon: pinIcon }).addTo(mapInstance);
+      const newMarker = window.L.marker(selectedLocation, { icon: customMarkerIcon }).addTo(mapInstance);
       setMarkerInstance(newMarker);
     }
 
     if (showAnswer && selectedLocation) {
-      // Gerçek konuma hedef dairesi çizme
-      const newCircle = window.L.circle(actualLocation, {
-        color: '#10b981',
-        fillColor: '#10b981',
-        fillOpacity: 0.2,
-        radius: 250000
-      }).addTo(mapInstance);
-
-      // Tahmin ile gerçek konum arasına çizgi çekme
-      const newPolyline = window.L.polyline([selectedLocation, actualLocation], {
-        color: '#f59e0b',
-        weight: 3,
-        dashArray: '6, 8'
-      }).addTo(mapInstance);
-
+      const newCircle = window.L.circle(actualLocation, { color: '#10b981', fillColor: '#10b981', fillOpacity: 0.2, radius: 250000 }).addTo(mapInstance);
+      const newPolyline = window.L.polyline([selectedLocation, actualLocation], { color: '#f59e0b', weight: 3, dashArray: '6, 8' }).addTo(mapInstance);
       setCircleInstance(newCircle);
       setPolylineInstance(newPolyline);
-
-      // Haritayı her iki noktayı sığdıracak şekilde odaklama
-      mapInstance.fitBounds([selectedLocation, actualLocation], {
-        padding: [40, 40],
-        maxZoom: 5,
-        animate: true,
-        duration: 1.2
-      });
+      mapInstance.fitBounds([selectedLocation, actualLocation], { padding: [40, 40], maxZoom: 5, animate: true, duration: 1.2 });
     }
   }, [selectedLocation, showAnswer, mapInstance]);
 
-  // Tahmini Kilitleme
   const handleGuess = () => {
     if (!selectedLocation) {
-      setShowWarning("Lütfen önce haritadan stadyumun bulunduğunu tahmin ettiğiniz konumu işaretleyin.");
+      setShowWarning("Lütfen önce harita üzerinden tahmini konumunuzu işaretleyiniz.");
       playSynthSound(220, 'sawtooth', 0.25);
       return;
     }
-
-    // Coğrafi sapma puanı
-    const distance = calculateDistance(
-      selectedLocation[0],
-      selectedLocation[1],
-      actualLocation[0],
-      actualLocation[1]
-    );
+    const distance = calculateDistance(selectedLocation[0], selectedLocation[1], actualLocation[0], actualLocation[1]);
     const gPoints = Math.max(0, Math.round(2500 - distance));
-
-    // Zaman sapması puanı
     const yearDifference = Math.abs(selectedYear - (currentQuestion.year || 2000));
     const tPoints = Math.max(0, 2500 - (yearDifference * 150));
 
@@ -307,13 +236,10 @@ export default function App() {
     setGeoPoints(gPoints);
     setTimePoints(tPoints);
     setShowAnswer(true);
-
-    // Kilitlendiğinde synth arpeji
     playSynthSound(330, 'triangle', 0.15);
     setTimeout(() => playSynthSound(495, 'triangle', 0.2), 150);
   };
 
-  // Sıradaki Soruya Geçme
   const handleNext = () => {
     setShowAnswer(false);
     setSelectedLocation(null);
@@ -322,13 +248,10 @@ export default function App() {
     setGeoPoints(0);
     setTimePoints(0);
 
-    // 5 round kontrolü (Güvenli geçiş)
     if (currentQuestionIndex < 4) {
       setCurrentQuestionIndex(prev => prev + 1);
       playSynthSound(523.25, 'sine', 0.15);
-      if (mapInstance) {
-        mapInstance.setView([25, 0], 1);
-      }
+      if (mapInstance) mapInstance.setView([25, 0], 1);
     } else {
       setShowFinalModal(true);
       playSynthSound(587.33, 'triangle', 0.2);
@@ -336,45 +259,54 @@ export default function App() {
     }
   };
 
-  // 1. DURUM: BAŞLANGIÇ GİRİŞ EKRANI
+  const handleRestartGame = () => {
+    setShowFinalModal(false);
+    setCurrentQuestionIndex(0);
+    setScore(0);
+    setGameStarted(false);
+  };
+
+  // 1. DURUM: BAŞLANGIÇ EKRANI
   if (!gameStarted) {
     return (
       <div style={{ backgroundColor: '#0f172a', color: '#f8fafc', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '16px', fontFamily: 'sans-serif', boxSizing: 'border-box' }}>
-        <div style={{ width: '100%', maxWidth: '560px', backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '28px', padding: '44px 32px', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)' }}>
+        <div style={{ width: '100%', maxWidth: '580px', backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '28px', padding: '48px 36px', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)' }}>
           <div style={{ fontSize: '56px', marginBottom: '16px' }}>🕵️‍♂️🏆</div>
           <h1 style={{ fontSize: '38px', fontWeight: '950', background: 'linear-gradient(to right, #f59e0b, #e11d48)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: '0 0 12px 0', letterSpacing: '-0.03em' }}>
             SportsTime Detective
           </h1>
-          <p style={{ color: '#94a3b8', fontSize: '15px', fontWeight: '500', margin: '0 0 32px 0', lineHeight: '1.6' }}>
-            Yazılı açıklama veya ipucu yok. Sadece fotoğraftaki gizli detayları analiz ederek stadyumu ve yılı tahmin edin.
+          <p style={{ color: '#94a3b8', fontSize: '15px', fontWeight: '500', margin: '0 0 36px 0', lineHeight: '1.6' }}>
+            Açıklama veya ipucu bulunmamaktadır. Yalnızca görseldeki detayları analiz ederek stadyumu ve yılı tahmin ediniz.
           </p>
 
-          <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '36px', backgroundColor: '#0f172a', padding: '20px', borderRadius: '18px', border: '1px solid #334155' }}>
-            <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
-              <span style={{ fontSize: '24px' }}>🔍</span>
+          <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '22px', marginBottom: '44px', backgroundColor: '#0f172a', padding: '24px', borderRadius: '18px', border: '1px solid #334155' }}>
+            <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+              <span style={{ fontSize: '28px' }}>🔍</span>
               <div>
-                <h3 style={{ margin: '0 0 2px 0', fontSize: '14px', fontWeight: '700', color: '#f8fafc' }}>Görsel Detay Analizi</h3>
-                <p style={{ margin: 0, fontSize: '12px', color: '#94a3b8' }}>Kıyafet tarzları, marka detayları ve mimari unsurlar dönemi belirlemenizi kolaylaştıracaktır.</p>
+                <h3 style={{ margin: '0 0 2px 0', fontSize: '15px', fontWeight: '700', color: '#f8fafc' }}>Görsel Analizi (Tıklayarak Büyütün)</h3>
+                <p style={{ margin: 0, fontSize: '13px', color: '#94a3b8' }}>Forma tasarımları, tribün mimarisi ve seyirciler; dönemi ve konumu belirlemenizi sağlayacaktır.</p>
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
-              <span style={{ fontSize: '24px' }}>📍</span>
+
+            <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+              <span style={{ fontSize: '28px' }}>📍</span>
               <div>
-                <h3 style={{ margin: '0 0 2px 0', fontSize: '14px', fontWeight: '700', color: '#f59e0b' }}>Çift Katmanlı Harita</h3>
-                <p style={{ margin: 0, fontSize: '12px', color: '#94a3b8' }}>Konumu tahmin ederken dilerseniz karanlık temayı, dilerseniz uydu görünümünü tercih edin.</p>
+                <h3 style={{ margin: '0 0 2px 0', fontSize: '15px', fontWeight: '700', color: '#f59e0b' }}>Mekan Seçimi (Maks. 2500 Puan)</h3>
+                <p style={{ margin: 0, fontSize: '13px', color: '#94a3b8' }}>Harita üzerinden stadyumun tam konumunu işaretleyiniz.</p>
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
-              <span style={{ fontSize: '24px' }}>⏳</span>
+
+            <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+              <span style={{ fontSize: '28px' }}>⏳</span>
               <div>
-                <h3 style={{ margin: '0 0 2px 0', fontSize: '14px', fontWeight: '700', color: '#3b82f6' }}>Yıl Sürgüsü</h3>
-                <p style={{ margin: 0, fontSize: '12px', color: '#94a3b8' }}>Zaman çizgisini kaydırarak tarihi anı tam isabetle tahmin edin.</p>
+                <h3 style={{ margin: '0 0 2px 0', fontSize: '15px', fontWeight: '700', color: '#3b82f6' }}>Yıl Tahmini (Maks. 2500 Puan)</h3>
+                <p style={{ margin: 0, fontSize: '13px', color: '#94a3b8' }}>Zaman çizelgesini kullanarak olayın gerçekleştiği yılı belirleyiniz.</p>
               </div>
             </div>
           </div>
 
-          <button onClick={startNewGame} style={{ width: '100%', padding: '16px 28px', fontSize: '18px', fontWeight: '800', color: 'white', background: 'linear-gradient(to right, #f59e0b, #e11d48)', border: 'none', borderRadius: '18px', cursor: 'pointer', boxShadow: '0 10px 20px -3px rgba(245, 158, 11, 0.3)' }}>
-            Oyunu Başlat (5 Round) ➔
+          <button onClick={startNewGame} style={{ width: '100%', padding: '18px 32px', fontSize: '18px', fontWeight: '800', color: 'white', background: 'linear-gradient(to right, #f59e0b, #e11d48)', border: 'none', borderRadius: '20px', cursor: 'pointer', boxShadow: '0 10px 20px -3px rgba(245, 158, 11, 0.3)' }}>
+            Mücadeleyi Başlat (5 Round) ➔
           </button>
         </div>
       </div>
@@ -400,75 +332,52 @@ export default function App() {
         <div style={{ flex: '1 1 420px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ padding: '5px 12px', backgroundColor: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', border: '1px solid rgba(245, 158, 11, 0.2)', borderRadius: '9999px', fontSize: '11px', fontWeight: '750' }}>
-              🏀 {currentQuestion.sport || "Spor"}
+              ⚽ {currentQuestion.sport || "Spor"}
             </span>
-            <span style={{ fontSize: '11px', color: '#64748b' }}>🔍 Büyütmek için fotoğrafa tıklayın</span>
+            <span style={{ fontSize: '11px', color: '#64748b' }}>🔍 İncelemek için fotoğrafa tıklayınız</span>
           </div>
 
           <div 
             onClick={() => setIsZoomed(true)}
             style={{ overflow: 'hidden', borderRadius: '16px', border: '2px solid #475569', height: '340px', position: 'relative', cursor: 'zoom-in', backgroundColor: '#0f172a', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.5)' }}
           >
-            <img 
-              src={imgSrc} 
-              alt="Detay İpucu" 
-              onError={handleImageError}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-            />
-            <div style={{ position: 'absolute', bottom: '12px', right: '12px', backgroundColor: 'rgba(15, 23, 42, 0.8)', padding: '8px', borderRadius: '50%', color: '#f8fafc' }}>
-              🔍
-            </div>
+            <img src={imgSrc} alt="İpucu" onError={handleImageError} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <div style={{ position: 'absolute', bottom: '12px', right: '12px', backgroundColor: 'rgba(15, 23, 42, 0.8)', padding: '8px', borderRadius: '50%', color: '#f8fafc' }}>🔍</div>
           </div>
         </div>
 
         {/* Sağ Sütun: Harita & Zaman Çizelgesi */}
         <div style={{ flex: '1 1 450px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
-          {/* Harita ve Katman Değiştirici */}
           <div style={{ width: '100%', height: '280px', borderRadius: '18px', overflow: 'hidden', border: '2px solid #475569', position: 'relative', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.5)' }}>
             <div id="game-map" style={{ width: '100%', height: '100%', backgroundColor: '#0f172a' }}></div>
-            
-            {/* Harita Modu Değiştirici Buton */}
             <button 
-              onClick={() => {
-                setSatelliteMode(prev => !prev);
-                playSynthSound(500, 'sine', 0.1);
-              }}
-              style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 1000, backgroundColor: '#1e293b', border: '1px solid #475569', color: 'white', padding: '6px 12px', borderRadius: '8px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.3)' }}
+              onClick={() => { setSatelliteMode(prev => !prev); playSynthSound(500, 'sine', 0.1); }}
+              style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 1000, backgroundColor: '#1e293b', border: '1px solid #475569', color: 'white', padding: '6px 12px', borderRadius: '8px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }}
             >
               🗺️ {satelliteMode ? "Karanlık Tema" : "Uydu Görünümü"}
             </button>
           </div>
 
-          {/* Zaman Çizelgesi */}
           <div style={{ backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '18px', padding: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <span style={{ fontSize: '13px', color: '#94a3b8', fontWeight: '700' }}>Tahmin Ettiğin Yıl:</span>
+              <span style={{ fontSize: '13px', color: '#94a3b8', fontWeight: '700' }}>Tahmin Ettiğiniz Yıl:</span>
               <span style={{ fontSize: '18px', color: '#38bdf8', fontWeight: '900', backgroundColor: 'rgba(56, 189, 248, 0.15)', padding: '2px 10px', borderRadius: '6px' }}>{selectedYear}</span>
             </div>
 
             <input 
-              type="range" 
-              min="1900" 
-              max="2026" 
-              value={selectedYear}
-              disabled={showAnswer}
+              type="range" min="1900" max="2026" value={selectedYear} disabled={showAnswer}
               onChange={(e) => setSelectedYear(Number(e.target.value))}
               style={{ width: '100%', accentColor: '#38bdf8', cursor: 'pointer' }}
             />
 
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#475569', marginTop: '6px', fontWeight: '700' }}>
-              <span>1900</span>
-              <span>1930</span>
-              <span>1960</span>
-              <span>1990</span>
-              <span>2020</span>
-              <span>2026</span>
+              <span>1900</span><span>1930</span><span>1960</span><span>1990</span><span>2020</span><span>2026</span>
             </div>
 
             {showAnswer && (
               <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px dashed #334155', display: 'flex', justifyContent: 'space-between', fontSize: '13px', alignItems: 'center' }}>
-                <span style={{ color: '#94a3b8' }}>Gerçek Yıl: <strong style={{ color: '#10b981' }}>{currentQuestion.year}</strong></span>
+                <span style={{ color: '#94a3b8' }}>Doğru Yıl: <strong style={{ color: '#10b981' }}>{currentQuestion.year}</strong></span>
                 <span style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '2px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: '750' }}>
                   Sapma: {Math.abs(selectedYear - (currentQuestion.year || 2000))} Yıl
                 </span>
@@ -490,15 +399,9 @@ export default function App() {
 
           {showAnswer && (
             <div style={{ fontSize: '12px', borderLeft: '1px solid #334155', paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
-              <p style={{ color: '#cbd5e1', margin: 0 }}>
-                📍 Konum: <span style={{ color: '#10b981', fontWeight: 'bold' }}>+{geoPoints}</span> <span style={{ color: '#64748b' }}>({currentDistance} km sapma)</span>
-              </p>
-              <p style={{ color: '#cbd5e1', margin: 0 }}>
-                ⏳ Zaman: <span style={{ color: '#38bdf8', fontWeight: 'bold' }}>+{timePoints}</span>
-              </p>
-              <p style={{ color: '#94a3b8', margin: 0, fontSize: '11px', fontStyle: 'italic' }}>
-                Lokasyon: {currentQuestion.locationName}
-              </p>
+              <p style={{ color: '#cbd5e1', margin: 0 }}>📍 Konum Puanı: <span style={{ color: '#10b981', fontWeight: 'bold' }}>+{geoPoints}</span> <span style={{ color: '#64748b' }}>({currentDistance} km sapma)</span></p>
+              <p style={{ color: '#cbd5e1', margin: 0 }}>⏳ Zaman Puanı: <span style={{ color: '#38bdf8', fontWeight: 'bold' }}>+{timePoints}</span></p>
+              <p style={{ color: '#94a3b8', margin: 0, fontSize: '11px', fontStyle: 'italic' }}>Doğru Konum: {currentQuestion.locationName}</p>
             </div>
           )}
         </div>
@@ -506,11 +409,11 @@ export default function App() {
         <div>
           {!showAnswer ? (
             <button onClick={handleGuess} style={{ padding: '12px 28px', fontSize: '15px', fontWeight: '900', color: 'white', background: 'linear-gradient(to right, #10b981, #059669)', border: 'none', borderRadius: '14px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)' }}>
-              Tahmini Gönder! 🎯
+              Tahmini Onayla
             </button>
           ) : (
             <button onClick={handleNext} style={{ padding: '12px 28px', fontSize: '15px', fontWeight: '900', color: 'white', backgroundColor: '#3b82f6', border: 'none', borderRadius: '14px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(59, 130, 246, 0.25)' }}>
-              {currentQuestionIndex === 4 ? "Sonuçları Göster 🏆" : "Sıradaki Soru ➔"}
+              {currentQuestionIndex === 4 ? "Sonucu Görüntüle" : "Sonraki Round ➔"}
             </button>
           )}
         </div>
@@ -526,7 +429,7 @@ export default function App() {
           <div style={{ maxWidth: '90%', maxHeight: '82%', overflow: 'hidden', borderRadius: '20px', border: '3px solid #475569' }}>
             <img src={imgSrc} alt="Büyütülmüş Görsel" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
-          <p style={{ color: '#64748b', marginTop: '16px', fontSize: '13px', fontWeight: '600' }}>Kapatmak için görselin dışına tıklayın.</p>
+          <p style={{ color: '#64748b', marginTop: '16px', fontSize: '13px', fontWeight: '600' }}>Kapatmak için ekrana tıklayınız.</p>
         </div>
       )}
 
@@ -538,31 +441,27 @@ export default function App() {
         </div>
       )}
 
-      {/* KRİTİK HATA ÖNLEYİCİ BÜYÜK SKOR KARTI MODALI */}
+      {/* OYUN BİTTİ MODERN SKOR KARTI MODALI */}
       {showFinalModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(15, 23, 42, 0.97)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5000, padding: '16px' }}>
           <div style={{ width: '100%', maxWidth: '460px', backgroundColor: '#1e293b', border: '2px solid #334155', borderRadius: '24px', padding: '36px 28px', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)' }}>
             <span style={{ fontSize: '64px' }}>🏆</span>
             <h2 style={{ fontSize: '28px', fontWeight: '950', color: '#10b981', margin: '12px 0 6px 0' }}>Mücadele Tamamlandı!</h2>
-            <p style={{ color: '#94a3b8', fontSize: '14px', margin: '0 0 20px 0' }}>Tarihin en efsanevi 5 anını başarıyla analiz ettiniz.</p>
+            <p style={{ color: '#94a3b8', fontSize: '14px', margin: '0 0 20px 0' }}>Spor tarihinin en efsanevi 5 anını başarıyla analiz ettiniz.</p>
 
             <div style={{ backgroundColor: '#0f172a', borderRadius: '16px', padding: '20px', marginBottom: '20px', border: '1px solid #334155' }}>
-              <span style={{ color: '#64748b', fontSize: '12px', fontWeight: '700', display: 'block', marginBottom: '4px' }}>ELDE ETTİĞİNİZ SKOR</span>
+              <span style={{ color: '#64748b', fontSize: '12px', fontWeight: '700', display: 'block', marginBottom: '4px' }}>ELDE EDİLEN SKOR</span>
               <span style={{ fontSize: '42px', fontWeight: '950', color: '#f59e0b', textShadow: '0 0 8px rgba(245, 158, 11, 0.25)' }}>{score}</span>
             </div>
 
             <div style={{ backgroundColor: 'rgba(56, 189, 248, 0.05)', border: '1px solid rgba(56, 189, 248, 0.2)', borderRadius: '16px', padding: '16px', marginBottom: '28px', textAlign: 'left' }}>
-              <span style={{ color: '#38bdf8', fontSize: '12px', fontWeight: '850', display: 'block', marginBottom: '4px' }}>DEDEKTİF RÜTBENİZ</span>
+              <span style={{ color: '#38bdf8', fontSize: '12px', fontWeight: '850', display: 'block', marginBottom: '4px' }}>DEDEKTİF RÜTBESİ</span>
               <h4 style={{ color: 'white', fontSize: '16px', fontWeight: '800', margin: '0 0 4px 0' }}>{getRank(score).title}</h4>
               <p style={{ color: '#94a3b8', fontSize: '12px', margin: 0, lineHeight: '1.4' }}>{getRank(score).desc}</p>
             </div>
 
-            <button onClick={() => {
-              setGameStarted(false);
-              setShowFinalModal(false);
-              playSynthSound(400, 'triangle', 0.2);
-            }} style={{ width: '100%', padding: '14px 24px', fontSize: '15px', fontWeight: '800', color: 'white', background: 'linear-gradient(to right, #10b981, #059669)', border: 'none', borderRadius: '12px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)' }}>
-              Ana Menüye Dön ➔
+            <button onClick={handleRestartGame} style={{ width: '100%', padding: '14px 24px', fontSize: '15px', fontWeight: '800', color: 'white', background: 'linear-gradient(to right, #10b981, #059669)', border: 'none', borderRadius: '12px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)' }}>
+              Tekrar Oyna ➔
             </button>
           </div>
         </div>
@@ -571,3 +470,5 @@ export default function App() {
     </div>
   );
 }
+
+export default App;
