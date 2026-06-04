@@ -1,259 +1,66 @@
 import { useState, useEffect } from 'react';
 
 // Tüm efsanevi spor anlarının yer aldığı 11 soruluk profesyonel havuz
-const ALL_MOMENTS = [
-  {
-    id: 1,
-    sport: "Basketbol",
-    title: "The Last Shot",
-    hint: "Jordan'ın şut attığı andaki pota arkası seyircilerin tepkisine, kırmızı Bulls deplasman formasına ve zemin üzerindeki logoya dikkat edin.",
-    localPhotoUrl: "/sports_photos/jordan.jpg",
-    fallbackPhotoUrl: "https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=1200",
-    lat: 40.7683,
-    lng: -111.8911,
-    year: 1998,
-    locationName: "Delta Center, Salt Lake City, Utah, ABD"
+
+ const ICONIC_MOMENTS = [
+  // --- KENDİ SEÇTİĞİN 21 ORİJİNAL EFSANE ---
+  { id: 1, sport: "Futbol", title: "Agüerooooo!", hint: "93:20'de gelen tarihi Premier Lig şampiyonluğu golü.", localPhotoUrl: "/sports_photos/aguero.jpg", lat: 53.4831, lng: -2.2004, year: 2012, locationName: "Etihad Stadyumu, Manchester" },
+  { id: 2, sport: "Boks", title: "Ali vs Liston", hint: "Ringin üzerinde yıkılan rakibine bağıran efsane şampiyon.", localPhotoUrl: "/sports_photos/ali.jpg", lat: 44.1014, lng: -70.2148, year: 1965, locationName: "Lewiston, Maine, ABD" },
+  { id: 3, sport: "Atletizm", title: "Bolt'un Gülümsemesi", hint: "Rakiplerine fark atıp bitiş çizgisine bakarak gülümsediği o an.", localPhotoUrl: "/sports_photos/bolt.jpg", lat: -22.8932, lng: -43.2923, year: 2016, locationName: "Olimpiyat Stadyumu, Rio, Brezilya" },
+  { id: 4, sport: "Tenis", title: "Wimbledon Epik Finali", hint: "Karanlık çökerken biten o inanılmaz Federer - Nadal maçı.", localPhotoUrl: "/sports_photos/federer_nadal.jpg", lat: 51.4343, lng: -0.2145, year: 2008, locationName: "Wimbledon, Londra" },
+  { id: 5, sport: "Futbol", title: "İstanbul Mucizesi", hint: "Liverpool'un Milan'a karşı 3-0'dan geri döndüğü unutulmaz gece.", localPhotoUrl: "/sports_photos/istanbul.jpg", lat: 41.0744, lng: 28.7656, year: 2005, locationName: "Atatürk Olimpiyat Stadyumu, İstanbul" },
+  { id: 6, sport: "Basketbol", title: "The Last Shot", hint: "Jordan'ın şut attığı andaki pota arkası seyircilerin tepkisine bak.", localPhotoUrl: "/sports_photos/jordan.jpg", lat: 40.7683, lng: -111.8911, year: 1998, locationName: "Delta Center, Utah" },
+  { id: 7, sport: "Basketbol", title: "Kobe 81 Sayı", hint: "Tarihin en büyük ikinci skor performansının yaşandığı gece.", localPhotoUrl: "/sports_photos/kobe.jpg", lat: 34.0430, lng: -118.2673, year: 2006, locationName: "Staples Center, Los Angeles" },
+  { id: 8, sport: "Basketbol", title: "LeBron'un Bloğu", hint: "Finaller 7. maçında Iguodala'ya yapılan o efsanevi blok.", localPhotoUrl: "/sports_photos/lebron.jpg", lat: 37.7503, lng: -122.2030, year: 2016, locationName: "Oracle Arena, Oakland" },
+  { id: 9, sport: "Futbol", title: "Tanrı'nın Eli", hint: "İngiltere'ye elle atılan o tartışmalı tarihi gol.", localPhotoUrl: "/sports_photos/maradona.jpg", lat: 19.3031, lng: -99.1506, year: 1986, locationName: "Estadio Azteca, Meksika" },
+  { id: 10, sport: "Futbol", title: "Messi'nin Rüyası", hint: "Messi'nin nihayet Dünya Kupası'nı kaldırdığı o unutulmaz Katar gecesi.", localPhotoUrl: "/sports_photos/messi_worldcup.jpg", lat: 25.4208, lng: 51.4903, year: 2022, locationName: "Lusail Stadyumu, Katar" },
+  { id: 11, sport: "Tenis", title: "Toprak Kortun Kralı", hint: "Nadal'ın evi olarak bilinen ve kupaları domine ettiği yer.", localPhotoUrl: "/sports_photos/nadal.jpg", lat: 48.8471, lng: 2.2476, year: 2022, locationName: "Roland Garros, Paris" },
+  { id: 12, sport: "Futbol", title: "Pelé 1970", hint: "Brezilya'nın futbol tarihine geçen o ikonik dünya kupası zaferi.", localPhotoUrl: "/sports_photos/pele_1970.jpg", lat: 19.3031, lng: -99.1506, year: 1970, locationName: "Estadio Azteca, Meksika" },
+  { id: 13, sport: "Yüzme", title: "Phelps'in 8 Altını", hint: "Tek olimpiyatta kırılan o ulaşılamaz altın madalya rekoru.", localPhotoUrl: "/sports_photos/phelps.jpg", lat: 39.9913, lng: 116.3861, year: 2008, locationName: "Water Cube, Pekin, Çin" },
+  { id: 14, sport: "Basketbol", title: "Ray Allen'ın Üçlüğü", hint: "Finaller 6. maçında, Miami'yi ipten alan o meşhur köşe üçlüğü.", localPhotoUrl: "/sports_photos/ray_allen.jpg", lat: 25.7814, lng: -80.1870, year: 2013, locationName: "American Airlines Arena, Miami" },
+  { id: 15, sport: "Futbol", title: "Ronaldo'nun Rövaşatası", hint: "Rakip taraftarların bile ayakta alkışladığı o inanılmaz sıçrama.", localPhotoUrl: "/sports_photos/ronaldo_bicycle.jpg", lat: 45.1095, lng: 7.6413, year: 2018, locationName: "Allianz Stadyumu, Torino" },
+  { id: 16, sport: "Formula 1", title: "Schumacher'in Dönemi", hint: "Ferrari efsanesinin altın yıllarında Japonya'da kazandığı şampiyonluk.", localPhotoUrl: "/sports_photos/schumacher.jpg", lat: 34.8431, lng: 136.5411, year: 2000, locationName: "Suzuka Pisti, Japonya" },
+  { id: 17, sport: "Formula 1", title: "Senna'nın Son Yarışı", hint: "F1 tarihinin en hüzünlü pisti.", localPhotoUrl: "/sports_photos/senna.jpg", lat: 44.3439, lng: 11.7167, year: 1994, locationName: "Imola Pisti, İtalya" },
+  { id: 18, sport: "Golf", title: "Tiger Woods Dönüşü", hint: "Yıllar süren sakatlıklardan sonra gelen o mucizevi Masters zaferi.", localPhotoUrl: "/sports_photos/tiger_woods.jpg", lat: 33.5033, lng: -82.0223, year: 2019, locationName: "Augusta National, Georgia" },
+  { id: 19, sport: "Amerikan Futbolu", title: "Tom Brady 28-3", hint: "Süper Bowl tarihinin en büyük geri dönüşü.", localPhotoUrl: "/sports_photos/tom_brady.jpg", lat: 29.6847, lng: -95.4107, year: 2017, locationName: "NRG Stadyumu, Houston" },
+  { id: 20, sport: "Formula 1", title: "Verstappen Son Tur", hint: "Son yarışın, son turunun, son virajında kazanılan o çılgın şampiyonluk.", localPhotoUrl: "/sports_photos/verstappen.jpg", lat: 24.4672, lng: 54.6031, year: 2021, locationName: "Yas Marina, Abu Dabi" },
+  { id: 21, sport: "Futbol", title: "Zidane'ın Volesi", hint: "Şampiyonlar Ligi finalinde gelişine vurulan o kusursuz sol ayak.", localPhotoUrl: "/sports_photos/zidane.jpg", lat: 55.8257, lng: -4.2520, year: 2002, locationName: "Hampden Park, Glasgow" },
+  
+  // --- SENİN EKLENEN 3 YENİ DRAMATİK OLAY (DOSYA İSİMLERİ BİREBİR AYNI) ---
+  { 
+    id: 22, 
+    sport: "Futbol", 
+    title: "Zidane'ın Kafa Atışı", 
+    hint: "Dünya Kupası finalinde, efsanevi kariyerini kırmızı kartla bitiren o olaylı an.", 
+    localPhotoUrl: "/sports_photos/GettyImages-503368718.jpg.webp", 
+    lat: 52.5147, 
+    lng: 13.2397, 
+    year: 2006, 
+    locationName: "Olympiastadion, Berlin, Almanya" 
   },
-  {
-    id: 2,
-    sport: "Futbol",
-    title: "Zidane'ın Uzay Volesi",
-    hint: "Zidane'ın giydiği efsanevi beyaz Real Madrid formasına, stadyumun tarihi İngiliz/İskoç tarzı dik tribün yapısına ve o dönemin atmosferine odaklanın.",
-    localPhotoUrl: "/sports_photos/zidane.jpg",
-    fallbackPhotoUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=1200",
-    lat: 55.8532,
-    lng: -4.2522,
-    year: 2002,
-    locationName: "Hampden Park, Glasgow, İskoçya"
+  { 
+    id: 23, 
+    sport: "Boks", 
+    title: "Tyson'ın Isırığı", 
+    hint: "Mike Tyson'ın ringde Holyfield'ın kulağını ısırdığı ve maçın yarıda kaldığı o çılgın gece.", 
+    localPhotoUrl: "/sports_photos/b109f80f-4e20-4115-b4c6-0f57c67ea0bf_1140x641.jpg", 
+    lat: 36.1147, 
+    lng: -115.1728, 
+    year: 1997, 
+    locationName: "MGM Grand, Las Vegas, ABD" 
   },
-  {
-    id: 3,
-    sport: "Formula 1",
-    title: "Imola'da Kara Gün",
-    hint: "Efsanevi Williams-Renault mavi-beyaz aracına, pistin virajındaki o meşhur sarı-yeşil kask detayına ve Formula 1 güvenlik bariyerlerine dikkat edin.",
-    localPhotoUrl: "/sports_photos/senna.jpg",
-    fallbackPhotoUrl: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=1200",
-    lat: 44.3439,
-    lng: 11.7167,
-    year: 1994,
-    locationName: "Autodromo Enzo e Dino Ferrari (Imola), İtalya"
-  },
-  {
-    id: 4,
-    sport: "Basketbol",
-    title: "Kobe Bryant 81 Sayı",
-    hint: "Sarı Lakers formasının üzerindeki '81' rakamı olmasa da, Kobe'nin şut stilini, salonun ışıklandırmasını ve zemin parıltısını inceleyin.",
-    localPhotoUrl: "/sports_photos/kobe.jpg",
-    fallbackPhotoUrl: "https://images.unsplash.com/photo-1519766304817-4f37bda74a27?q=80&w=1200",
-    lat: 34.0430,
-    lng: -118.2673,
-    year: 2006,
-    locationName: "Crypto.com Arena (Staples Center), Los Angeles, ABD"
-  },
-  {
-    id: 5,
-    sport: "Futbol",
-    title: "İstanbul Mucizesi",
-    hint: "Kırmızı Liverpool ve mavi-siyah Milan formalarının çarpışmasına, Atatürk Olimpiyat Stadyumu'nun devasa rüzgarlı tribün boşluğuna ve havaya kalkan kupanın parıltısına odaklanın.",
-    localPhotoUrl: "/sports_photos/istanbul.jpg",
-    fallbackPhotoUrl: "https://images.unsplash.com/photo-1543351611-58f69d7c1781?q=80&w=1200",
-    lat: 41.0744,
-    lng: 28.7656,
-    year: 2005,
-    locationName: "Atatürk Olimpiyat Stadyumu, İstanbul, Türkiye"
-  },
-  {
-    id: 6,
-    sport: "Tenis",
-    title: "Wimbledon 2008 Epik Finali",
-    hint: "Federer ve Nadal'ın kucaklaştığı andaki beyaz kıyafetlerine, Wimbledon'ın meşhur çim ve yeşil arka planına ve o dönemin tenis raketlerine dikkat edin.",
-    localPhotoUrl: "/sports_photos/federer_nadal.jpg",
-    fallbackPhotoUrl: "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?q=80&w=1200",
-    lat: 51.4343,
-    lng: -0.2145,
-    year: 2008,
-    locationName: "All England Lawn Tennis Club (Center Court), Londra, İngiltere"
-  },
-  {
-    id: 7,
-    sport: "Futbol",
-    title: "Tanrı'nın Eli (Maradona)",
-    hint: "Maradona'nın İngiltere kalecisi Peter Shilton'ın üzerinden elle topu aşırttığı ana, Meksika stadyumunun devasa beton tribün halkalarına ve 1986 yılına odaklanın.",
-    localPhotoUrl: "/sports_photos/maradona.jpg",
-    fallbackPhotoUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=1200",
-    lat: 19.3031,
-    lng: -99.1506,
-    year: 1986,
-    locationName: "Estadio Azteca, Mexico City, Meksika"
-  },
-  {
-    id: 8,
-    sport: "Basketbol",
-    title: "The Block (LeBron James)",
-    hint: "LeBron'un Andre Iguodala'yı kovalayıp havada bloğu vurduğu o efsane ana, arkadaki sarı tişörtlü taraftarlara ve Oracle Arena'nın detaylarına odaklanın.",
-    localPhotoUrl: "/sports_photos/lebron.jpg",
-    fallbackPhotoUrl: "https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=1200",
-    lat: 37.7503,
-    lng: -122.2030,
-    year: 2016,
-    locationName: "Oracle Arena, Oakland, Kaliforniya, ABD"
-  },
-  {
-    id: 9,
-    sport: "Atletizm",
-    title: "Usain Bolt - Rio'daki Gülüş",
-    hint: "Bolt'un 100 metre yarı finalinde rakiplerine dönüp gülümsediği masmavi olimpiyat pistine, arkadaki Rio Olimpiyat logolarına ve Jamaika formasına odaklanın.",
-    localPhotoUrl: "/sports_photos/bolt.jpg",
-    fallbackPhotoUrl: "https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?q=80&w=1200",
-    lat: -22.8932,
-    lng: -43.2923,
-    year: 2016,
-    locationName: "Estádio Olímpico Nilton Santos, Rio de Janeiro, Brezilya"
-  },
-  {
-    id: 10,
-    sport: "Boks",
-    title: "Ali vs. Liston",
-    hint: "Muhammed Ali'nin Sonny Liston'ı nakavt ettikten sonra tepesinde bağırdığı ana, siyah-beyaz seyircilere ve ring ışıklarının yarattığı karanlık atmosfere dikkat edin.",
-    localPhotoUrl: "/sports_photos/ali.jpg",
-    fallbackPhotoUrl: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1200",
-    lat: 44.1014,
-    lng: -70.2148,
-    year: 1965,
-    locationName: "St. Dominic's Arena, Lewiston, Maine, ABD"
-  },
-  {
-    id: 11,
-    sport: "Formula 1",
-    title: "Schumacher Japonya'da Şampiyon",
-    hint: "Schumacher'in kırmızı Ferrari tulumuyla kürsüde kupayı kaldırdığı Suzuka podyumuna ve arkadaki kırmızı-beyaz Japon reklam panolarına dikkat edin.",
-    localPhotoUrl: "/sports_photos/schumacher.jpg",
-    fallbackPhotoUrl: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=1200",
-    lat: 34.8431,
-    lng: 136.5411,
-    year: 2000,
-    locationName: "Suzuka International Racing Course, Suzuka, Japonya"
-  },
-  {
-    id: 12,
-    sport: "Futbol",
-    title: "Agüeroooo (93:20)",
-    hint: "Manchester City'nin Premier League kupasını uzatmalarda kapışındaki tarihi golü, mavi-beyaz tribünleri ve stadyum parmaklıklarını inceleyin.",
-    localPhotoUrl: "/sports_photos/aguero.jpg",
-    fallbackPhotoUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=1200",
-    lat: 53.4831,
-    lng: -2.2002,
-    year: 2012,
-    locationName: "Etihad Stadium, Manchester, İngiltere"
-  },
-  {
-    id: 13,
-    sport: "Basketbol",
-    title: "Ray Allen'ın Mucize Üçlüğü",
-    hint: "NBA Finalleri 6. maçında, Miami Heat seyircilerinin birçoğunun salonu erken terk etmeye başladığı o efsanevi köşe üçlüğü anını ve parke detayını süzün.",
-    localPhotoUrl: "/sports_photos/ray_allen.jpg",
-    fallbackPhotoUrl: "https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=1200",
-    lat: 25.7814,
-    lng: -80.1870,
-    year: 2013,
-    locationName: "Kaseya Center (American Airlines Arena), Miami, Florida, ABD"
-  },
-  {
-    id: 14,
-    sport: "Formula 1",
-    title: "Max Verstappen İlk Kez Şampiyon",
-    hint: "Son turda Lewis Hamilton'ı geçip yarışı ve şampiyonluğu kazandığı o tarihi anın, pist kenarındaki devasa ışıklı panellere ve Red Bull ekibinin tepkisine dikkat edin.",
-    localPhotoUrl: "/sports_photos/verstappen.jpg",
-    fallbackPhotoUrl: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=1200",
-    lat: 24.4672,
-    lng: 54.6031,
-    year: 2021,
-    locationName: "Yas Marina Circuit, Abu Dhabi, Birleşik Arap Emirlikleri"
-  },
-  {
-    id: 15,
-    sport: "Tenis",
-    title: "Rafael Nadal'ın 14. Roland Garros Zaferi",
-    hint: "Toprak kortun kralının, killi kırmızı sahada dizlerinin üzerine çöküp kupayı kaldırdığı o anın arkasında bulunan yeşil tribün panellerine odaklanın.",
-    localPhotoUrl: "/sports_photos/nadal.jpg",
-    fallbackPhotoUrl: "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?q=80&w=1200",
-    lat: 48.8473,
-    lng: 2.2492,
-    year: 2022,
-    locationName: "Stade Roland Garros, Paris, Fransa"
-  },
-  {
-    id: 16,
-    sport: "Futbol",
-    title: "Lionel Messi Dünya Kupasını Kaldırıyor",
-    hint: "Messi'nin geleneksel Bişt kıyafetiyle, takım arkadaşlarının omuzlarında kupayı göğe kaldırdığı o altın parıltılı stadyum atmosferine ve tribün ışıklarına bakın.",
-    localPhotoUrl: "/sports_photos/messi_worldcup.jpg",
-    fallbackPhotoUrl: "https://images.unsplash.com/photo-1543351611-58f69d7c1781?q=80&w=1200",
-    lat: 25.4208,
-    lng: 51.4889,
-    year: 2022,
-    locationName: "Lusail Stadium, Lusail, Katar"
-  },
-  {
-    id: 17,
-    sport: "Amerikan Futbolu",
-    title: "Tom Brady 28-3 Geri Dönüşü",
-    hint: "Super Bowl LI tarihindeki o unutulmaz geri dönüşün ardından New England Patriots takımının havaya kalkan kupasını, devasa kapalı stadyum mimarisini ve konfetileri inceleyin.",
-    localPhotoUrl: "/sports_photos/tom_brady.jpg",
-    fallbackPhotoUrl: "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?q=80&w=1200",
-    lat: 29.6847,
-    lng: -95.4107,
-    year: 2017,
-    locationName: "NRG Stadium, Houston, Texas, ABD"
-  },
-  {
-    id: 18,
-    sport: "Yüzme",
-    title: "Michael Phelps Pekin'de Tarih Yazıyor",
-    hint: "0.01 saniye farkla kazanılan ve Phelps'e 8. altın madalyasını getiren o meşhur finiş anının, arkadaki havuz panellerine ve olimpiyat logolarına dikkat edin.",
-    localPhotoUrl: "/sports_photos/phelps.jpg",
-    fallbackPhotoUrl: "https://images.unsplash.com/photo-1519766304817-4f37bda74a27?q=80&w=1200",
-    lat: 39.9922,
-    lng: 116.3839,
-    year: 2008,
-    locationName: "Pekin Ulusal Su Sporları Merkezi (Water Cube), Pekin, Çin"
-  },
-  {
-    id: 19,
-    sport: "Futbol",
-    title: "Pelé Havada (1970)",
-    hint: "Pelé'nin İtalya'ya attığı golden sonra Jairzinho'nun kollarına zıpladığı o efsanevi sarı-yeşil Brezilya formasına ve Azteca'nın tarihi beton basamaklarına bakın.",
-    localPhotoUrl: "/sports_photos/pele_1970.jpg",
-    fallbackPhotoUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=1200",
-    lat: 19.3031,
-    lng: -99.1506,
-    year: 1970,
-    locationName: "Estadio Azteca, Mexico City, Meksika"
-  },
-  {
-    id: 20,
-    sport: "Golf",
-    title: "Tiger Woods Masters Şampiyonu",
-    hint: "Tiger'ın yeşil ceketini giymeden hemen önce ikonik kırmızı tişörtüyle oğluyla kucaklaştığı Masters Turnuvası'nın arkasındaki yemyeşil çim ve ağaç detaylarına odaklanın.",
-    localPhotoUrl: "/sports_photos/tiger_woods.jpg",
-    fallbackPhotoUrl: "https://images.unsplash.com/photo-1535131749006-b7f58c99034b?q=80&w=1200",
-    lat: 33.5022,
-    lng: -82.0223,
-    year: 2019,
-    locationName: "Augusta National Golf Club, Augusta, Georgia, ABD"
-  },
-  {
-    id: 21,
-    sport: "Futbol",
-    title: "Cristiano Ronaldo Rövaşatası",
-    hint: "Ronaldo'nun yer çekimine meydan okuyup havaya yükseldiği o müthiş rövaşata golünün arkasındaki siyah-beyaz Juventus stadyumu koltuklarına ve havanın karanlığına bakın.",
-    localPhotoUrl: "/sports_photos/ronaldo_bicycle.jpg",
-    fallbackPhotoUrl: "https://images.unsplash.com/photo-1543351611-58f69d7c1781?q=80&w=1200",
-    lat: 45.1096,
-    lng: 7.6413,
-    year: 2018,
-    locationName: "Allianz Stadium, Torino, İtalya"
+  { 
+    id: 24, 
+    sport: "Futbol", 
+    title: "Suarez'in Isırığı", 
+    hint: "Uruguaylı forvetin İtalyan savunmacı Chiellini'yi omuzundan ısırdığı o tuhaf an.", 
+    localPhotoUrl: "/sports_photos/3751.webp", 
+    lat: -5.7833, 
+    lng: -35.2167, 
+    year: 2014, 
+    locationName: "Arena das Dunas, Natal, Brezilya" 
   }
+
 ];
 
 // Dünya haritası için Haversine formülü
