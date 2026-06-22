@@ -5,7 +5,6 @@ import 'leaflet/dist/leaflet.css';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot } from 'firebase/firestore';
 
-// İşte kanka, senin Firebase anahtarını buraya yerleştirdim bile!
 const firebaseConfig = {
   apiKey: "AIzaSyDqR_PnpJDyMwAq_JTR28jNCYMW3KRMuh8",
   authDomain: "mapletics-e1e53.firebaseapp.com",
@@ -70,10 +69,10 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 }
 
 function getRank(totalScore) {
-  if (totalScore >= 22000) return { title: "Haritanın Efendisi 👑", desc: "Kusursuz!" };
-  if (totalScore >= 15000) return { title: "Efsane Dedektif 🕵️‍♂️", desc: "Harika performans." };
-  if (totalScore >= 7000) return { title: "Yetenekli Gözlemci 🎤", desc: "İyi mücadele." };
-  return { title: "Çaylak Dedektif 🔍", desc: "Daha fazla pratik lazım." };
+  if (totalScore >= 22000) return { title: "Global Elite 👑", desc: "Kusursuz performans." };
+  if (totalScore >= 15000) return { title: "Master 💎", desc: "Harika gözlem yeteneği." };
+  if (totalScore >= 7000) return { title: "Pro 🎯", desc: "İyi mücadele." };
+  return { title: "Çaylak 🐣", desc: "Daha fazla pratik gerekli." };
 }
 
 function MapController({ selected, actual, show }) {
@@ -155,7 +154,7 @@ export default function App() {
   const generateCode = () => Math.random().toString(36).substring(2, 6).toUpperCase();
 
   const handleCreateRoom = async () => {
-    if (!playerName.trim()) return setShowWarning("Lütfen önce bir Dedektif Adı belirleyiniz!");
+    if (!playerName.trim()) return setShowWarning("Lütfen bir kullanıcı adı belirleyin.");
     
     const code = generateCode();
     const shuffled = [...ICONIC_MOMENTS].sort(() => 0.5 - Math.random()).slice(0, 5);
@@ -174,8 +173,8 @@ export default function App() {
   };
 
   const handleJoinRoom = async () => {
-    if (!playerName.trim()) return setShowWarning("Lütfen önce bir Dedektif Adı belirleyiniz!");
-    if (!joinCodeInput.trim()) return setShowWarning("Lütfen geçerli bir Oda Kodu giriniz!");
+    if (!playerName.trim()) return setShowWarning("Lütfen bir kullanıcı adı belirleyin.");
+    if (!joinCodeInput.trim()) return setShowWarning("Lütfen geçerli bir oda kodu girin.");
     
     const code = joinCodeInput.toUpperCase();
     const roomRef = doc(db, "rooms", code);
@@ -190,7 +189,7 @@ export default function App() {
       setGameMode('lobby');
       playSynthSound(600, 'triangle', 0.2);
     } else {
-      setShowWarning("Oda bulunamadı veya oyun çoktan başlamış!");
+      setShowWarning("Oda bulunamadı veya oyun başladı.");
     }
   };
 
@@ -229,7 +228,7 @@ export default function App() {
 
   const handleGuess = () => {
     if (!selectedLocation) {
-      setShowWarning("Lütfen önce harita üzerinden tahmini konumunuzu işaretleyiniz.");
+      setShowWarning("Harita üzerinden tahmini konumunuzu işaretleyin.");
       return;
     }
 
@@ -276,38 +275,38 @@ export default function App() {
           <h1 style={{ fontSize: '42px', fontWeight: '950', background: 'linear-gradient(to right, #f59e0b, #e11d48)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: '0 0 12px 0', letterSpacing: '-0.03em' }}>
             Mapletics
           </h1>
-          <p style={{ color: '#94a3b8', fontSize: '15px', marginBottom: '32px' }}>Oynamak için bir dedektif adı belirle.</p>
+          <p style={{ color: '#94a3b8', fontSize: '15px', marginBottom: '32px' }}>Haritaya giriş yapmak için bir isim belirleyin.</p>
           
           <input 
             type="text" 
-            placeholder="Dedektif Adın (Örn: Teoman)" 
+            placeholder="Kullanıcı Adı" 
             value={playerName}
             onChange={(e) => setPlayerName(e.target.value)}
-            style={{ width: '100%', padding: '16px', fontSize: '18px', backgroundColor: '#0f172a', border: '2px solid #334155', borderRadius: '16px', color: 'white', marginBottom: '24px', textAlign: 'center', boxSizing: 'border-box' }}
+            style={{ width: '100%', padding: '16px', fontSize: '18px', backgroundColor: '#0f172a', border: '2px solid #334155', borderRadius: '16px', color: 'white', marginBottom: '24px', textAlign: 'center', boxSizing: 'border-box', outline: 'none' }}
           />
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <button onClick={startSinglePlayer} style={{ padding: '16px', fontSize: '16px', fontWeight: 'bold', backgroundColor: '#334155', color: 'white', border: 'none', borderRadius: '16px', cursor: 'pointer' }}>
-              👤 Tek Oyunculu Oyna
+            <button onClick={startSinglePlayer} style={{ padding: '16px', fontSize: '16px', fontWeight: 'bold', backgroundColor: '#334155', color: 'white', border: 'none', borderRadius: '16px', cursor: 'pointer', transition: 'all 0.2s' }}>
+              👤 Tek Oyunculu
             </button>
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '10px 0' }}>
               <div style={{ flex: 1, height: '1px', backgroundColor: '#334155' }}></div>
-              <span style={{ color: '#64748b', fontSize: '12px', fontWeight: 'bold' }}>VEYA ARKADAŞINLA KAPIŞ</span>
+              <span style={{ color: '#64748b', fontSize: '12px', fontWeight: 'bold', letterSpacing: '1px' }}>ÇOK OYUNCULU MOD</span>
               <div style={{ flex: 1, height: '1px', backgroundColor: '#334155' }}></div>
             </div>
 
             <button onClick={handleCreateRoom} style={{ padding: '16px', fontSize: '16px', fontWeight: 'bold', background: 'linear-gradient(to right, #10b981, #059669)', color: 'white', border: 'none', borderRadius: '16px', cursor: 'pointer', boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)' }}>
-              ⚔️ Yeni Oda Kur
+              ⚔️ Yeni Oda Oluştur
             </button>
             
             <div style={{ display: 'flex', gap: '8px' }}>
               <input 
                 type="text" 
-                placeholder="Oda Kodu (Örn: A7B2)" 
+                placeholder="Oda Kodu" 
                 value={joinCodeInput}
                 onChange={(e) => setJoinCodeInput(e.target.value.toUpperCase())}
-                style={{ flex: 1, padding: '16px', fontSize: '16px', backgroundColor: '#0f172a', border: '2px solid #334155', borderRadius: '16px', color: 'white', textAlign: 'center', textTransform: 'uppercase' }}
+                style={{ flex: 1, padding: '16px', fontSize: '16px', backgroundColor: '#0f172a', border: '2px solid #334155', borderRadius: '16px', color: 'white', textAlign: 'center', textTransform: 'uppercase', outline: 'none' }}
                 maxLength={4}
               />
               <button onClick={handleJoinRoom} style={{ padding: '16px 24px', fontSize: '16px', fontWeight: 'bold', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '16px', cursor: 'pointer' }}>
@@ -318,7 +317,7 @@ export default function App() {
         </div>
 
         {showWarning && (
-          <div style={{ position: 'fixed', bottom: '24px', backgroundColor: '#ef4444', color: 'white', padding: '12px 24px', borderRadius: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ position: 'fixed', bottom: '24px', backgroundColor: '#ef4444', color: 'white', padding: '12px 24px', borderRadius: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.3)' }}>
             <span>⚠️ {showWarning}</span>
             <button onClick={() => setShowWarning(null)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}>X</button>
           </div>
@@ -336,21 +335,24 @@ export default function App() {
             {roomCode}
           </div>
           
-          <h3 style={{ color: '#f8fafc', fontSize: '18px', marginBottom: '16px' }}>Katılan Dedektifler:</h3>
+          <h3 style={{ color: '#f8fafc', fontSize: '18px', marginBottom: '16px', textAlign: 'left' }}>Lobideki Oyuncular:</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '32px' }}>
             {roomData?.players && Object.keys(roomData.players).map((p, i) => (
-              <div key={i} style={{ backgroundColor: p === playerName ? 'rgba(16, 185, 129, 0.2)' : '#0f172a', border: p === playerName ? '1px solid #10b981' : '1px solid #334155', padding: '12px', borderRadius: '12px', color: 'white', fontWeight: 'bold' }}>
-                {p === roomData.host ? "👑 " : "🕵️‍♂️ "}{p} {p === playerName && "(Sen)"}
+              <div key={i} style={{ backgroundColor: p === playerName ? 'rgba(16, 185, 129, 0.2)' : '#0f172a', border: p === playerName ? '1px solid #10b981' : '1px solid #334155', padding: '14px', borderRadius: '12px', color: 'white', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span>{p === roomData.host ? "👑" : "🎮"}</span>
+                <span>{p} {p === playerName && "(Sen)"}</span>
               </div>
             ))}
           </div>
 
           {isHost ? (
-            <button onClick={startMultiplayerGame} style={{ width: '100%', padding: '18px', fontSize: '18px', fontWeight: 'bold', background: 'linear-gradient(to right, #f59e0b, #e11d48)', color: 'white', border: 'none', borderRadius: '16px', cursor: 'pointer' }}>
-              ⚔️ Kapışmayı Başlat
+            <button onClick={startMultiplayerGame} style={{ width: '100%', padding: '18px', fontSize: '18px', fontWeight: 'bold', background: 'linear-gradient(to right, #f59e0b, #e11d48)', color: 'white', border: 'none', borderRadius: '16px', cursor: 'pointer', boxShadow: '0 4px 15px rgba(225, 29, 72, 0.3)' }}>
+              Oyunu Başlat
             </button>
           ) : (
-            <p style={{ color: '#38bdf8', fontWeight: 'bold', fontSize: '16px', animation: 'pulse 2s infinite' }}>Kurucunun oyunu başlatması bekleniyor...</p>
+            <div style={{ padding: '18px', backgroundColor: 'rgba(56, 189, 248, 0.1)', border: '1px solid #38bdf8', borderRadius: '16px', color: '#38bdf8', fontWeight: 'bold', fontSize: '16px', animation: 'pulse 2s infinite' }}>
+              Oda sahibinin başlatması bekleniyor...
+            </div>
           )}
         </div>
       </div>
@@ -375,7 +377,7 @@ export default function App() {
           <div style={{ flex: '1 1 420px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ padding: '5px 12px', backgroundColor: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', border: '1px solid rgba(245, 158, 11, 0.2)', borderRadius: '9999px', fontSize: '11px', fontWeight: '750' }}>
-                ⚽ {currentQuestion.sport || "Spor"}
+                🎯 {currentQuestion.sport || "Spor"}
               </span>
             </div>
             <div onClick={() => setIsZoomed(true)} style={{ overflow: 'hidden', borderRadius: '16px', border: '2px solid #475569', height: '340px', position: 'relative', cursor: 'zoom-in', backgroundColor: '#0f172a' }}>
@@ -386,7 +388,7 @@ export default function App() {
           <div style={{ flex: '1 1 450px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{ width: '100%', height: '280px', borderRadius: '18px', overflow: 'hidden', border: '2px solid #475569', position: 'relative' }}>
               <button onClick={() => setSatelliteMode(!satelliteMode)} style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 1000, backgroundColor: '#1e293b', border: '1px solid #475569', color: 'white', padding: '6px 12px', borderRadius: '8px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }}>
-                🗺️ {satelliteMode ? "Karanlık Tema" : "Uydu"}
+                🗺️ {satelliteMode ? "Karanlık Tema" : "Uydu Görünümü"}
               </button>
               <MapContainer center={[25, 0]} zoom={1} style={{ width: '100%', height: '100%', backgroundColor: '#0f172a' }} worldCopyJump={true}>
                 <TileLayer url={satelliteMode ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}' : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'} />
@@ -404,7 +406,7 @@ export default function App() {
 
             <div style={{ backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '18px', padding: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                <span style={{ fontSize: '13px', color: '#94a3b8', fontWeight: '700' }}>Tahmini Yıl:</span>
+                <span style={{ fontSize: '13px', color: '#94a3b8', fontWeight: '700' }}>Yıl Tahmini:</span>
                 <span style={{ fontSize: '18px', color: '#38bdf8', fontWeight: '900' }}>{selectedYear}</span>
               </div>
               <input type="range" min="1900" max="2026" value={selectedYear} disabled={showAnswer} onChange={(e) => setSelectedYear(Number(e.target.value))} style={{ width: '100%', accentColor: '#38bdf8' }} />
@@ -420,7 +422,7 @@ export default function App() {
         <div style={{ width: '100%', maxWidth: '1000px', backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '20px', padding: '16px', marginTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
             <div style={{ backgroundColor: '#0f172a', padding: '8px 16px', borderRadius: '12px', border: '1px solid #334155', textAlign: 'center' }}>
-              <span style={{ color: '#64748b', fontSize: '10px', display: 'block', fontWeight: '700' }}>SKORUN</span>
+              <span style={{ color: '#64748b', fontSize: '10px', display: 'block', fontWeight: '700', letterSpacing: '1px' }}>SKOR</span>
               <span style={{ fontSize: '22px', fontWeight: '950', color: '#10b981' }}>{score}</span>
             </div>
             {showAnswer && (
@@ -431,15 +433,14 @@ export default function App() {
           </div>
           <div>
             {!showAnswer ? (
-              <button onClick={handleGuess} style={{ padding: '12px 28px', fontSize: '15px', fontWeight: '900', color: 'white', background: 'linear-gradient(to right, #10b981, #059669)', border: 'none', borderRadius: '14px', cursor: 'pointer' }}>Tahmini Onayla</button>
+              <button onClick={handleGuess} style={{ padding: '12px 28px', fontSize: '15px', fontWeight: '900', color: 'white', background: 'linear-gradient(to right, #10b981, #059669)', border: 'none', borderRadius: '14px', cursor: 'pointer', boxShadow: '0 4px 15px rgba(16, 185, 129, 0.2)' }}>Onayla</button>
             ) : (
-              <button onClick={handleNext} style={{ padding: '12px 28px', fontSize: '15px', fontWeight: '900', color: 'white', backgroundColor: '#3b82f6', border: 'none', borderRadius: '14px', cursor: 'pointer' }}>{currentQuestionIndex === 4 ? "Sonucu Gör" : "Sonraki Round ➔"}</button>
+              <button onClick={handleNext} style={{ padding: '12px 28px', fontSize: '15px', fontWeight: '900', color: 'white', backgroundColor: '#3b82f6', border: 'none', borderRadius: '14px', cursor: 'pointer', boxShadow: '0 4px 15px rgba(59, 130, 246, 0.2)' }}>{currentQuestionIndex === 4 ? "Sonuçları Gör" : "Sıradaki Konum ➔"}</button>
             )}
           </div>
         </div>
 
-        {isZoomed && <div onClick={() => setIsZoomed(false)} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(15, 23, 42, 0.96)', zIndex: 3000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}><img src={currentQuestion.localPhotoUrl} style={{ maxWidth: '100%', maxHeight: '90%', borderRadius: '20px', border: '3px solid #475569' }}/></div>}
-        {showWarning && <div style={{ position: 'fixed', bottom: '24px', backgroundColor: '#ef4444', color: 'white', padding: '12px 24px', borderRadius: '12px', fontWeight: 'bold' }}>⚠️ {showWarning}</div>}
+        {isZoomed && <div onClick={() => setIsZoomed(false)} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(15, 23, 42, 0.96)', zIndex: 3000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}><img src={currentQuestion.localPhotoUrl} style={{ maxWidth: '100%', maxHeight: '90%', borderRadius: '20px', border: '3px solid #475569', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}/></div>}
       </div>
     );
   }
@@ -447,13 +448,13 @@ export default function App() {
   if (gameMode === 'result') {
     return (
       <div style={{ backgroundColor: '#0f172a', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '16px', fontFamily: 'sans-serif' }}>
-        <div style={{ width: '100%', maxWidth: '500px', backgroundColor: '#1e293b', border: '2px solid #334155', borderRadius: '28px', padding: '36px 28px', textAlign: 'center' }}>
+        <div style={{ width: '100%', maxWidth: '500px', backgroundColor: '#1e293b', border: '2px solid #334155', borderRadius: '28px', padding: '36px 28px', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
           <span style={{ fontSize: '64px' }}>🏆</span>
-          <h2 style={{ fontSize: '28px', fontWeight: '950', color: '#10b981', margin: '12px 0 24px 0' }}>Mücadele Tamamlandı!</h2>
+          <h2 style={{ fontSize: '28px', fontWeight: '950', color: '#10b981', margin: '12px 0 24px 0' }}>Oyun Tamamlandı</h2>
           
           {roomCode && roomData?.players ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
-              <h3 style={{ color: '#94a3b8', fontSize: '14px', margin: 0 }}>Canlı Skorbord (Oda: {roomCode})</h3>
+              <h3 style={{ color: '#94a3b8', fontSize: '14px', margin: 0, textAlign: 'left', paddingLeft: '8px' }}>Maç Sonucu (Oda: {roomCode})</h3>
               {Object.entries(roomData.players)
                 .sort(([, a], [, b]) => b.score - a.score) 
                 .map(([pName, pData], index) => (
@@ -464,21 +465,21 @@ export default function App() {
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <span style={{ display: 'block', fontSize: '20px', fontWeight: '950', color: '#10b981' }}>{pData.score}</span>
-                      <span style={{ fontSize: '10px', color: pData.finished ? '#10b981' : '#ef4444' }}>{pData.finished ? "Tamamladı" : "Oynuyor..."}</span>
+                      <span style={{ fontSize: '10px', color: pData.finished ? '#10b981' : '#ef4444', fontWeight: 'bold' }}>{pData.finished ? "Tamamladı" : "Oynuyor..."}</span>
                     </div>
                   </div>
               ))}
             </div>
           ) : (
             <div style={{ backgroundColor: '#0f172a', borderRadius: '16px', padding: '24px', marginBottom: '24px', border: '1px solid #334155' }}>
-              <span style={{ color: '#64748b', fontSize: '12px', fontWeight: '700', display: 'block', marginBottom: '8px' }}>SENİN SKORUN</span>
+              <span style={{ color: '#64748b', fontSize: '12px', fontWeight: '700', display: 'block', marginBottom: '8px', letterSpacing: '1px' }}>TOPLAM SKOR</span>
               <span style={{ fontSize: '48px', fontWeight: '950', color: '#f59e0b' }}>{score}</span>
-              <p style={{ color: '#38bdf8', fontSize: '14px', fontWeight: 'bold', marginTop: '12px' }}>Rütbe: {getRank(score).title}</p>
+              <p style={{ color: '#38bdf8', fontSize: '14px', fontWeight: 'bold', marginTop: '12px' }}>Klasman: {getRank(score).title}</p>
             </div>
           )}
 
-          <button onClick={() => { setGameMode('menu'); setRoomCode(''); }} style={{ width: '100%', padding: '16px', fontSize: '16px', fontWeight: 'bold', backgroundColor: '#334155', color: 'white', border: 'none', borderRadius: '16px', cursor: 'pointer' }}>
-            Ana Menüye Dön ➔
+          <button onClick={() => { setGameMode('menu'); setRoomCode(''); }} style={{ width: '100%', padding: '16px', fontSize: '16px', fontWeight: 'bold', backgroundColor: '#334155', color: 'white', border: 'none', borderRadius: '16px', cursor: 'pointer', transition: 'all 0.2s' }}>
+            Ana Menüye Dön
           </button>
         </div>
       </div>
