@@ -32,31 +32,56 @@ const customMarkerIcon = L.divIcon({
   iconAnchor: [7, 7]
 });
 
+// --- EFSANE ANLAR VE BİLGİ KUTULARI ---
 const ICONIC_MOMENTS = [
-  { id: 1, sport: {tr: "Futbol", en: "Football"}, title: "Agüerooooo!", year: 2012, lat: 53.4831, lng: -2.2004, locationName: {tr: "Etihad Stadyumu, Manchester", en: "Etihad Stadium, Manchester"}, localPhotoUrl: "/sports_photos/aguero.jpg" },
-  { id: 2, sport: {tr: "Boks", en: "Boxing"}, title: "Ali vs Liston", year: 1965, lat: 44.1014, lng: -70.2148, locationName: {tr: "Lewiston, Maine, ABD", en: "Lewiston, Maine, USA"}, localPhotoUrl: "/sports_photos/ali.jpg" },
-  { id: 3, sport: {tr: "Atletizm", en: "Athletics"}, title: "Bolt", year: 2016, lat: -22.8932, lng: -43.2923, locationName: {tr: "Olimpiyat Stadyumu, Rio", en: "Olympic Stadium, Rio"}, localPhotoUrl: "/sports_photos/bolt.jpg" },
-  { id: 4, sport: {tr: "Tenis", en: "Tennis"}, title: "Wimbledon Final", year: 2008, lat: 51.4343, lng: -0.2145, locationName: {tr: "Wimbledon, Londra", en: "Wimbledon, London"}, localPhotoUrl: "/sports_photos/federer_nadal.jpg" },
-  { id: 5, sport: {tr: "Futbol", en: "Football"}, title: "Istanbul Miracle", year: 2005, lat: 41.0744, lng: 28.7656, locationName: {tr: "Atatürk Olimpiyat Stadyumu, İstanbul", en: "Ataturk Olympic Stadium, Istanbul"}, localPhotoUrl: "/sports_photos/istanbul.jpg" },
-  { id: 6, sport: {tr: "Basketbol", en: "Basketball"}, title: "The Last Shot", year: 1998, lat: 40.7683, lng: -111.8911, locationName: {tr: "Delta Center, Utah", en: "Delta Center, Utah"}, localPhotoUrl: "/sports_photos/jordan.jpg" },
-  { id: 7, sport: {tr: "Basketbol", en: "Basketball"}, title: "Kobe 81 Points", year: 2006, lat: 34.0430, lng: -118.2673, locationName: {tr: "Staples Center, Los Angeles", en: "Staples Center, Los Angeles"}, localPhotoUrl: "/sports_photos/kobe.jpg" },
-  { id: 8, sport: {tr: "Basketbol", en: "Basketball"}, title: "The Block", year: 2016, lat: 37.7503, lng: -122.2030, locationName: {tr: "Oracle Arena, Oakland", en: "Oracle Arena, Oakland"}, localPhotoUrl: "/sports_photos/lebron.jpg" },
-  { id: 9, sport: {tr: "Futbol", en: "Football"}, title: "Hand of God", year: 1986, lat: 19.3031, lng: -99.1506, locationName: {tr: "Estadio Azteca, Meksika", en: "Estadio Azteca, Mexico"}, localPhotoUrl: "/sports_photos/maradona.jpg" },
-  { id: 10, sport: {tr: "Futbol", en: "Football"}, title: "Messi World Cup", year: 2022, lat: 25.4208, lng: 51.4903, locationName: {tr: "Lusail Stadyumu, Katar", en: "Lusail Stadium, Qatar"}, localPhotoUrl: "/sports_photos/messi_worldcup.jpg" },
-  { id: 11, sport: {tr: "Tenis", en: "Tennis"}, title: "King of Clay", year: 2022, lat: 48.8471, lng: 2.2476, locationName: {tr: "Roland Garros, Paris", en: "Roland Garros, Paris"}, localPhotoUrl: "/sports_photos/nadal.jpg" },
-  { id: 12, sport: {tr: "Futbol", en: "Football"}, title: "Pelé 1970", year: 1970, lat: 19.3031, lng: -99.1506, locationName: {tr: "Estadio Azteca, Meksika", en: "Estadio Azteca, Mexico"}, localPhotoUrl: "/sports_photos/pele_1970.jpg" },
-  { id: 13, sport: {tr: "Yüzme", en: "Swimming"}, title: "Phelps 8 Gold", year: 2008, lat: 39.9913, lng: 116.3861, locationName: {tr: "Water Cube, Pekin", en: "Water Cube, Beijing"}, localPhotoUrl: "/sports_photos/phelps.jpg" },
-  { id: 14, sport: {tr: "Basketbol", en: "Basketball"}, title: "Ray Allen 3PT", year: 2013, lat: 25.7814, lng: -80.1870, locationName: {tr: "American Airlines Arena, Miami", en: "American Airlines Arena, Miami"}, localPhotoUrl: "/sports_photos/ray_allen.jpg" },
-  { id: 15, sport: {tr: "Futbol", en: "Football"}, title: "Ronaldo Bicycle", year: 2018, lat: 45.1095, lng: 7.6413, locationName: {tr: "Allianz Stadyumu, Torino", en: "Allianz Stadium, Turin"}, localPhotoUrl: "/sports_photos/ronaldo_bicycle.jpg" },
-  { id: 16, sport: {tr: "Formula 1", en: "Formula 1"}, title: "Schumacher Era", year: 2000, lat: 34.8431, lng: 136.5411, locationName: {tr: "Suzuka Pisti, Japonya", en: "Suzuka Circuit, Japan"}, localPhotoUrl: "/sports_photos/schumacher.jpg" },
-  { id: 17, sport: {tr: "Formula 1", en: "Formula 1"}, title: "Senna Last Race", year: 1994, lat: 44.3439, lng: 11.7167, locationName: {tr: "Imola Pisti, İtalya", en: "Imola Circuit, Italy"}, localPhotoUrl: "/sports_photos/senna.jpg" },
-  { id: 18, sport: {tr: "Golf", en: "Golf"}, title: "Tiger Woods Return", year: 2019, lat: 33.5033, lng: -82.0223, locationName: {tr: "Augusta National, Georgia", en: "Augusta National, Georgia"}, localPhotoUrl: "/sports_photos/tiger_woods.jpg" },
-  { id: 19, sport: {tr: "Am. Futbolu", en: "Am. Football"}, title: "Tom Brady 28-3", year: 2017, lat: 29.6847, lng: -95.4107, locationName: {tr: "NRG Stadyumu, Houston", en: "NRG Stadium, Houston"}, localPhotoUrl: "/sports_photos/tom_brady.jpg" },
-  { id: 20, sport: {tr: "Formula 1", en: "Formula 1"}, title: "Verstappen Last Lap", year: 2021, lat: 24.4672, lng: 54.6031, locationName: {tr: "Yas Marina, Abu Dabi", en: "Yas Marina, Abu Dhabi"}, localPhotoUrl: "/sports_photos/verstappen.jpg" },
-  { id: 21, sport: {tr: "Futbol", en: "Football"}, title: "Zidane Volley", year: 2002, lat: 55.8257, lng: -4.2520, locationName: {tr: "Hampden Park, Glasgow", en: "Hampden Park, Glasgow"}, localPhotoUrl: "/sports_photos/zidane.jpg" },
-  { id: 22, sport: {tr: "Futbol", en: "Football"}, title: "Zidane Headbutt", year: 2006, lat: 52.5147, lng: 13.2397, locationName: {tr: "Olympiastadion, Berlin", en: "Olympiastadion, Berlin"}, localPhotoUrl: "/sports_photos/GettyImages-503368718.jpg.webp" },
-  { id: 23, sport: {tr: "Boks", en: "Boxing"}, title: "Tyson Bite", year: 1997, lat: 36.1147, lng: -115.1728, locationName: {tr: "MGM Grand, Las Vegas", en: "MGM Grand, Las Vegas"}, localPhotoUrl: "/sports_photos/b109f80f-4e20-4115-b4c6-0f57c67ea0bf_1140x641.jpg" },
-  { id: 24, sport: {tr: "Futbol", en: "Football"}, title: "Suarez Bite", year: 2014, lat: -5.7833, lng: -35.2167, locationName: {tr: "Arena das Dunas, Natal, Brezilya", en: "Arena das Dunas, Natal, Brazil"}, localPhotoUrl: "/sports_photos/3751.webp" }
+  { id: 1, sport: {tr: "Futbol", en: "Football"}, title: "Agüerooooo!", year: 2012, lat: 53.4831, lng: -2.2004, locationName: {tr: "Etihad Stadyumu, Manchester", en: "Etihad Stadium, Manchester"}, localPhotoUrl: "/sports_photos/aguero.jpg",
+    trivia: {tr: "Manchester City, 44 yıl aradan sonra tam 93. dakika 20. saniyede gelen bu golle, ezeli rakibi United'ın elinden şampiyonluğu söküp almıştır.", en: "Manchester City won the league after 44 years with this last-second goal at 93:20, snatching the title from local rivals United."} },
+  { id: 2, sport: {tr: "Boks", en: "Boxing"}, title: "Ali vs Liston", year: 1965, lat: 44.1014, lng: -70.2148, locationName: {tr: "Lewiston, Maine, ABD", en: "Lewiston, Maine, USA"}, localPhotoUrl: "/sports_photos/ali.jpg",
+    trivia: {tr: "Ali, rakibini o kadar hızlı ve görünmez bir yumrukla devirdi ki bu yumruğa 'Hayalet Yumruk' dendi. Diğer fotoğrafçılar kaçırırken Neil Leifer bu tarihi anı yakaladı.", en: "Ali knocked down his opponent with a punch so fast it was dubbed the 'Phantom Punch'. While other photographers missed it, Neil Leifer captured history."} },
+  { id: 3, sport: {tr: "Atletizm", en: "Athletics"}, title: "Bolt", year: 2016, lat: -22.8932, lng: -43.2923, locationName: {tr: "Olimpiyat Stadyumu, Rio", en: "Olympic Stadium, Rio"}, localPhotoUrl: "/sports_photos/bolt.jpg",
+    trivia: {tr: "Olimpiyat yarı finalinde, rakipleri hayatlarının yarışını koşarken Bolt'un yavaşlayıp kameraya gülümseyerek poz vermesi onun ne kadar 'uzaylı' olduğunu gösterir.", en: "While his opponents were running the race of their lives in an Olympic semi-final, Bolt slowed down and smiled at the camera, proving he was from another planet."} },
+  { id: 4, sport: {tr: "Tenis", en: "Tennis"}, title: "Wimbledon Final", year: 2008, lat: 51.4343, lng: -0.2145, locationName: {tr: "Wimbledon, Londra", en: "Wimbledon, London"}, localPhotoUrl: "/sports_photos/federer_nadal.jpg",
+    trivia: {tr: "Neredeyse gece karanlığında biten bu 5 setlik savaş, tenis tarihinin açık ara 'en iyi maçı' kabul edilir. Nadal, çim kortun kralını tahtından etmiştir.", en: "Ending in near darkness, this 5-set war is widely considered the 'greatest match ever'. Nadal dethroned the king of grass on his own court."} },
+  { id: 5, sport: {tr: "Futbol", en: "Football"}, title: "Istanbul Miracle", year: 2005, lat: 41.0744, lng: 28.7656, locationName: {tr: "Atatürk Olimpiyat Stadyumu, İstanbul", en: "Ataturk Olympic Stadium, Istanbul"}, localPhotoUrl: "/sports_photos/istanbul.jpg",
+    trivia: {tr: "Şampiyonlar Ligi finalinde ilk yarıyı 3-0 geride kapatan Liverpool'un, 6 dakikada 3 gol atarak kupayı mucizevi şekilde kazandığı o meşhur geri dönüş.", en: "Down 3-0 at halftime in the Champions League final, Liverpool scored 3 goals in 6 minutes to miraculously win the trophy."} },
+  { id: 6, sport: {tr: "Basketbol", en: "Basketball"}, title: "The Last Shot", year: 1998, lat: 40.7683, lng: -111.8911, locationName: {tr: "Delta Center, Utah", en: "Delta Center, Utah"}, localPhotoUrl: "/sports_photos/jordan.jpg",
+    trivia: {tr: "Michael Jordan'ın Bulls formasıyla attığı son şut. Bu mükemmel isabet ona 6. şampiyonluğunu getirdi ve sinema karesi gibi tarihe geçti.", en: "Michael Jordan's last shot in a Bulls uniform. This perfect release won him his 6th championship and looked like a scene from a movie."} },
+  { id: 7, sport: {tr: "Basketbol", en: "Basketball"}, title: "Kobe 81 Points", year: 2006, lat: 34.0430, lng: -118.2673, locationName: {tr: "Staples Center, Los Angeles", en: "Staples Center, Los Angeles"}, localPhotoUrl: "/sports_photos/kobe.jpg",
+    trivia: {tr: "Kobe Bryant'ın tek bir maçta 81 sayı atarak NBA tarihinin en skorer ikinci performansını sergilediği ve modern basketbolu yıktığı o inanılmaz gece.", en: "The unbelievable night Kobe Bryant scored 81 points in a single game, the second-highest scoring performance in NBA history."} },
+  { id: 8, sport: {tr: "Basketbol", en: "Basketball"}, title: "The Block", year: 2016, lat: 37.7503, lng: -122.2030, locationName: {tr: "Oracle Arena, Oakland", en: "Oracle Arena, Oakland"}, localPhotoUrl: "/sports_photos/lebron.jpg",
+    trivia: {tr: "1-3 geriden gelen Cleveland'a tarihi şampiyonluğu getiren, LeBron James'in fizik kurallarını hiçe sayarak yaptığı o insanüstü blok.", en: "The superhuman block by LeBron James that secured the historic comeback from a 1-3 deficit and brought Cleveland its first championship."} },
+  { id: 9, sport: {tr: "Futbol", en: "Football"}, title: "Hand of God", year: 1986, lat: 19.3031, lng: -99.1506, locationName: {tr: "Estadio Azteca, Meksika", en: "Estadio Azteca, Mexico"}, localPhotoUrl: "/sports_photos/maradona.jpg",
+    trivia: {tr: "Maradona, İngiltere kalecisinden önce topa eliyle vurarak gol atmış ve hakemi kandırmıştır. Maçtan sonra bu gole 'Tanrı'nın Eli' demiştir.", en: "Maradona scored by punching the ball over the English goalkeeper, deceiving the referee. He later called it the 'Hand of God'."} },
+  { id: 10, sport: {tr: "Futbol", en: "Football"}, title: "Messi World Cup", year: 2022, lat: 25.4208, lng: 51.4903, locationName: {tr: "Lusail Stadyumu, Katar", en: "Lusail Stadium, Qatar"}, localPhotoUrl: "/sports_photos/messi_worldcup.jpg",
+    trivia: {tr: "Tarihin en iyisi tartışmalarını bitiren an. Messi'nin koleksiyonundaki eksik olan tek kupayı, yerel Katar kıyafeti 'Bişt' ile havaya kaldırdığı kare.", en: "The moment that ended the GOAT debate. Messi lifting the only trophy missing from his collection while wearing a traditional Qatari 'Bisht'."} },
+  { id: 11, sport: {tr: "Tenis", en: "Tennis"}, title: "King of Clay", year: 2022, lat: 48.8471, lng: 2.2476, locationName: {tr: "Roland Garros, Paris", en: "Roland Garros, Paris"}, localPhotoUrl: "/sports_photos/nadal.jpg",
+    trivia: {tr: "Rafael Nadal'ın, dünyanın en zorlayıcı toprak kortunda inanılmaz bir şekilde 14. kez şampiyon olup 'Toprağın Kralı' ünvanını ebedileştirdiği an.", en: "The moment Rafael Nadal incredibly won his 14th championship on the grueling clay courts, immortalizing his title as the 'King of Clay'."} },
+  { id: 12, sport: {tr: "Futbol", en: "Football"}, title: "Pelé 1970", year: 1970, lat: 19.3031, lng: -99.1506, locationName: {tr: "Estadio Azteca, Meksika", en: "Estadio Azteca, Mexico"}, localPhotoUrl: "/sports_photos/pele_1970.jpg",
+    trivia: {tr: "Dünya Kupasını 3 kez kazanan tek futbolcu olan efsanevi Pelé'nin, attığı golden sonra Jairzinho'nun kucağına zıpladığı o en neşeli futbol karesi.", en: "The most joyful football image of Pelé, the only player to win 3 World Cups, jumping into Jairzinho's arms after scoring in the final."} },
+  { id: 13, sport: {tr: "Yüzme", en: "Swimming"}, title: "Phelps 8 Gold", year: 2008, lat: 39.9913, lng: 116.3861, locationName: {tr: "Water Cube, Pekin", en: "Water Cube, Beijing"}, localPhotoUrl: "/sports_photos/phelps.jpg",
+    trivia: {tr: "Michael Phelps, tek bir olimpiyatta 8 altın madalya kazanarak tarihin en büyük rekorunu kırdı. Bir yarışı sadece 0.01 saniye farkla kazanmıştı!", en: "Michael Phelps broke the ultimate record by winning 8 gold medals in a single Olympics. He won one of the races by just 0.01 seconds!"} },
+  { id: 14, sport: {tr: "Basketbol", en: "Basketball"}, title: "Ray Allen 3PT", year: 2013, lat: 25.7814, lng: -80.1870, locationName: {tr: "American Airlines Arena, Miami", en: "American Airlines Arena, Miami"}, localPhotoUrl: "/sports_photos/ray_allen.jpg",
+    trivia: {tr: "Görevliler şampiyonluk kutlaması için sarı şeritleri çekerken, Ray Allen son saniyede geri adım atarak attığı bu üçlükle maçı uzatmaya taşıdı ve tarihi değiştirdi.", en: "As staff prepared yellow ropes for the Spurs' celebration, Ray Allen hit a step-back three in the dying seconds to force OT and change history."} },
+  { id: 15, sport: {tr: "Futbol", en: "Football"}, title: "Ronaldo Bicycle", year: 2018, lat: 45.1095, lng: 7.6413, locationName: {tr: "Allianz Stadyumu, Torino", en: "Allianz Stadium, Turin"}, localPhotoUrl: "/sports_photos/ronaldo_bicycle.jpg",
+    trivia: {tr: "Ronaldo'nun 2.38 metre yükseğe zıplayarak attığı bu rövaşata o kadar kusursuzdu ki, rakip Juventus taraftarları bile ayağa kalkıp onu alkışladı.", en: "Ronaldo's bicycle kick, struck at a height of 2.38 meters, was so flawless that even the opposing Juventus fans stood up and applauded him."} },
+  { id: 16, sport: {tr: "Formula 1", en: "Formula 1"}, title: "Schumacher Era", year: 2000, lat: 34.8431, lng: 136.5411, locationName: {tr: "Suzuka Pisti, Japonya", en: "Suzuka Circuit, Japan"}, localPhotoUrl: "/sports_photos/schumacher.jpg",
+    trivia: {tr: "Ferrari'nin 21 yıllık şampiyonluk hasretini bitiren Schumacher'in, kırmızı tulumuyla podyumda ikonik sıçrayışını yaptığı an.", en: "Ending Ferrari's 21-year championship drought, Schumacher does his iconic leap on the podium in his red racing suit."} },
+  { id: 17, sport: {tr: "Formula 1", en: "Formula 1"}, title: "Senna Last Race", year: 1994, lat: 44.3439, lng: 11.7167, locationName: {tr: "Imola Pisti, İtalya", en: "Imola Circuit, Italy"}, localPhotoUrl: "/sports_photos/senna.jpg",
+    trivia: {tr: "Tarihin en yetenekli pilotu Ayrton Senna'nın, kaza yaparak hayatını kaybedeceği o lanetli yarış başlamadan hemen önceki son düşünceli bakışları.", en: "The haunting last thoughtful glance of Ayrton Senna, the most talented driver in history, moments before his fatal crash."} },
+  { id: 18, sport: {tr: "Golf", en: "Golf"}, title: "Tiger Woods Return", year: 2019, lat: 33.5033, lng: -82.0223, locationName: {tr: "Augusta National, Georgia", en: "Augusta National, Georgia"}, localPhotoUrl: "/sports_photos/tiger_woods.jpg",
+    trivia: {tr: "11 yıl süren ağır sakatlıklar ve kişisel çöküşün ardından Tiger Woods'un imkansızı başarıp yeniden şampiyon olduğu o kükreme anı.", en: "After 11 years of severe injuries and personal downfall, Tiger Woods achieved the impossible and won a major championship again."} },
+  { id: 19, sport: {tr: "Am. Futbolu", en: "Am. Football"}, title: "Tom Brady 28-3", year: 2017, lat: 29.6847, lng: -95.4107, locationName: {tr: "NRG Stadyumu, Houston", en: "NRG Stadium, Houston"}, localPhotoUrl: "/sports_photos/tom_brady.jpg",
+    trivia: {tr: "Super Bowl'da 28-3 geriye düşen Tom Brady, spor tarihinin en büyük geri dönüşünü yaparak maçı kazandı ve 'Kusursuz Lider' olduğunu kanıtladı.", en: "Down 28-3 in the Super Bowl, Tom Brady engineered the greatest comeback in sports history, cementing his legacy as the ultimate leader."} },
+  { id: 20, sport: {tr: "Formula 1", en: "Formula 1"}, title: "Verstappen Last Lap", year: 2021, lat: 24.4672, lng: 54.6031, locationName: {tr: "Yas Marina, Abu Dabi", en: "Yas Marina, Abu Dhabi"}, localPhotoUrl: "/sports_photos/verstappen.jpg",
+    trivia: {tr: "F1 tarihinin en dramatik sezonunda, son yarışın kelimenin tam anlamıyla 'son turunda' Hamilton'ı geçerek kazanılan ilk dünya şampiyonluğu.", en: "In the most dramatic season in F1 history, Verstappen won his first world championship by overtaking Hamilton on the absolute last lap."} },
+  { id: 21, sport: {tr: "Futbol", en: "Football"}, title: "Zidane Volley", year: 2002, lat: 55.8257, lng: -4.2520, locationName: {tr: "Hampden Park, Glasgow", en: "Hampden Park, Glasgow"}, localPhotoUrl: "/sports_photos/zidane.jpg",
+    trivia: {tr: "Zidane, gökten inen topa zayıf olan sol ayağıyla öyle kusursuz bir vole vurdu ki, bu gol Şampiyonlar Ligi tarihinin en güzel golü seçildi.", en: "Zidane struck a ball falling from the sky with his weaker left foot so flawlessly that it's widely considered the greatest Champions League goal ever."} },
+  { id: 22, sport: {tr: "Futbol", en: "Football"}, title: "Zidane Headbutt", year: 2006, lat: 52.5147, lng: 13.2397, locationName: {tr: "Olympiastadion, Berlin", en: "Olympiastadion, Berlin"}, localPhotoUrl: "/sports_photos/GettyImages-503368718.jpg.webp",
+    trivia: {tr: "Zidane'ın kariyerinin son maçı olan Dünya Kupası finalinde, Materazzi'nin göğsüne kafa atıp kırmızı kartla futbola veda ettiği şok edici an.", en: "In his final career match at the World Cup Final, Zidane shockingly headbutted Materazzi in the chest and retired with a red card."} },
+  { id: 23, sport: {tr: "Boks", en: "Boxing"}, title: "Tyson Bite", year: 1997, lat: 36.1147, lng: -115.1728, locationName: {tr: "MGM Grand, Las Vegas", en: "MGM Grand, Las Vegas"}, localPhotoUrl: "/sports_photos/b109f80f-4e20-4115-b4c6-0f57c67ea0bf_1140x641.jpg",
+    trivia: {tr: "Mike Tyson'ın maçın ortasında sinirlerine hakim olamayıp rakibi Evander Holyfield'ın kulağını kopardığı, spor tarihinin en vahşi anlarından biri.", en: "One of the wildest moments in sports history where Mike Tyson lost his temper mid-fight and literally bit off a piece of Evander Holyfield's ear."} },
+  { id: 24, sport: {tr: "Futbol", en: "Football"}, title: "Suarez Bite", year: 2014, lat: -5.7833, lng: -35.2167, locationName: {tr: "Arena das Dunas, Natal, Brezilya", en: "Arena das Dunas, Natal, Brazil"}, localPhotoUrl: "/sports_photos/3751.webp",
+    trivia: {tr: "Luis Suarez'in, canlı yayında milyonlarca insanın önünde rakibi Chiellini'yi omuzundan ısırdığı ve aylarca futboldan men edildiği o an.", en: "Luis Suarez shockingly bit his opponent Chiellini on the shoulder in front of millions watching live, earning him a months-long ban from football."} }
 ];
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -88,7 +113,7 @@ function MapController({ selected, actual, show }) {
 }
 
 export default function App() {
-  const [gameMode, setGameMode] = useState('menu'); // menu, lobby, playing, result
+  const [gameMode, setGameMode] = useState('menu'); 
   const [playerName, setPlayerName] = useState('');
   
   const [lang, setLang] = useState('tr'); 
@@ -127,7 +152,6 @@ export default function App() {
       oscillator.start();
       oscillator.stop(audioCtx.currentTime + duration);
     } catch (e) {
-      // Sessiz hata
     }
   };
 
@@ -253,13 +277,13 @@ export default function App() {
   };
 
   const theme = {
-    bg: '#121212',          // Zifiri Karanlık Ana Arka Plan
-    cardBg: '#1e1e1e',      // Mat Kart Arka Planı
-    border: '#2c2c2c',      // İnce Çizgiler (Çok mat)
-    text: '#ffffff',        // Ana Metin (Parlak beyaz)
-    textMuted: '#9ca3af',   // Soluk Gri Metin
-    accent: '#10b981',      // Zümrüt Yeşili (Başarı/Aksiyon)
-    primary: '#3b82f6',     // Canlı Mavi (Bilgi/İleri)
+    bg: '#121212',          
+    cardBg: '#1e1e1e',      
+    border: '#2c2c2c',      
+    text: '#ffffff',        
+    textMuted: '#9ca3af',   
+    accent: '#10b981',      
+    primary: '#3b82f6',     
     font: 'system-ui, -apple-system, sans-serif'
   };
 
@@ -420,7 +444,7 @@ export default function App() {
               </MapContainer>
             </div>
 
-            {/* YIL ÇİZELGESİ (TIMELINE) */}
+            {/* YIL ÇİZELGESİ (TIMELINE) VE CEVAPLAR */}
             <div style={{ backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '24px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '16px' }}>
                 <span style={{ fontSize: '13px', color: theme.textMuted, fontWeight: '600', textTransform: 'uppercase' }}>{t("Yıl Tahmini", "Guess the Year")}</span>
@@ -447,6 +471,17 @@ export default function App() {
                     <span>{t("Kazanılan Puan:", "Points Earned:")}</span>
                     <span>+{geoPoints + timePoints}</span>
                   </div>
+
+                  {/* YENİ EKLENEN TRİVİA (BİLGİ) KUTUSU */}
+                  <div style={{ marginTop: '8px', padding: '16px', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderLeft: `4px solid ${theme.primary}`, borderRadius: '0 8px 8px 0' }}>
+                    <h4 style={{ margin: '0 0 8px 0', fontSize: '14px', color: theme.primary, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      💡 {t("Neden Efsane?", "Why is it Legendary?")}
+                    </h4>
+                    <p style={{ margin: 0, fontSize: '13.5px', lineHeight: '1.5', color: '#cbd5e1' }}>
+                      {currentQuestion.trivia[lang]}
+                    </p>
+                  </div>
+
                 </div>
               )}
             </div>
