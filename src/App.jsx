@@ -113,7 +113,6 @@ const ICONIC_MOMENTS = [
     trivia: {tr: "NBA Play-off 7. maçında son saniyede atılan şutun çemberde 4 kez sekip içeri girdiği, sahadaki herkesin nefesini tuttuğu o sinematik saniyeler.", en: "The cinematic seconds where everyone held their breath as a buzzer-beater bounced 4 times on the rim before dropping in to win a Game 7."} }
 ];
 
-
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371; 
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -128,6 +127,38 @@ function getRank(totalScore, lang) {
   if (totalScore >= 15000) return { title: "Master 💎", desc: lang === 'en' ? "Great observation skills." : "Harika gözlem yeteneği." };
   if (totalScore >= 7000) return { title: "Pro 🎯", desc: lang === 'en' ? "Good effort." : "İyi mücadele." };
   return { title: lang === 'en' ? "Rookie 🐣" : "Çaylak 🐣", desc: lang === 'en' ? "More practice needed." : "Daha fazla pratik gerekli." };
+}
+
+// --- YENİ EKLENEN: AKILLI SORU SEÇME ALGORİTMASI ---
+function generateQuestions() {
+  // 1. Önce havuzu rastgele karıştır
+  const shuffled = [...ICONIC_MOMENTS].sort(() => 0.5 - Math.random());
+  const selected = [];
+  const sportCounts = {}; // Hangi spordan kaç tane aldığımızı tutan sayaç
+
+  // 2. Karıştırılmış havuzdan kurallara göre 5 tane seç
+  for (const q of shuffled) {
+    if (selected.length === 5) break;
+
+    const sportKey = q.sport.en; // 'Football', 'Basketball', 'Tennis' vb.
+    // Futbol ve Basketbol için limit 2, diğerleri için 1
+    const limit = (sportKey === 'Football' || sportKey === 'Basketball') ? 2 : 1;
+    const currentCount = sportCounts[sportKey] || 0;
+
+    // Eğer o sporun limitini doldurmadıysak seçime ekle
+    if (currentCount < limit) {
+      selected.push(q);
+      sportCounts[sportKey] = currentCount + 1;
+    }
+  }
+  
+  // Güvenlik Subabı: Eğer havuz yetersiz kalır da 5'i dolduramazsa, rastgele kalanlardan tamamla
+  if (selected.length < 5) {
+      const remaining = shuffled.filter(q => !selected.includes(q)).slice(0, 5 - selected.length);
+      selected.push(...remaining);
+  }
+  
+  return selected;
 }
 
 function MapController({ selected, actual, show }) {
@@ -208,11 +239,15 @@ export default function App() {
   const handleCreateRoom = async () => {
     if (!playerName.trim()) return setShowWarning(t("Lütfen bir kullanıcı adı belirleyin.", "Please enter a username."));
     const code = generateCode();
-    const shuffled = [...ICONIC_MOMENTS].sort(() => 0.5 - Math.random()).slice(0, 5);
+    
+    // ESKİ HALİ: const shuffled = [...ICONIC_MOMENTS].sort(() => 0.5 - Math.random()).slice(0, 5);
+    // YENİ HALİ: Artık akıllı algoritmamızı kullanıyoruz
+    const selectedQuestions = generateQuestions();
+    
     await setDoc(doc(db, "rooms", code), {
       host: playerName,
       status: "waiting",
-      questions: shuffled,
+      questions: selectedQuestions,
       players: { [playerName]: { score: 0, finished: false } }
     });
     setRoomCode(code);
@@ -246,8 +281,12 @@ export default function App() {
 
   const startSinglePlayer = () => {
     if (!playerName.trim()) return setShowWarning(t("Lütfen bir kullanıcı adı belirleyin.", "Please enter a username."));
-    const shuffled = [...ICONIC_MOMENTS].sort(() => 0.5 - Math.random()).slice(0, 5);
-    setActiveQuestions(shuffled);
+    
+    // ESKİ HALİ: const shuffled = [...ICONIC_MOMENTS].sort(() => 0.5 - Math.random()).slice(0, 5);
+    // YENİ HALİ: Artık akıllı algoritmamızı kullanıyoruz
+    const selectedQuestions = generateQuestions();
+    
+    setActiveQuestions(selectedQuestions);
     setRoomCode(''); 
     setGameMode('playing');
     setCurrentQuestionIndex(0);
