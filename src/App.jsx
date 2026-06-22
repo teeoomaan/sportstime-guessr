@@ -60,7 +60,7 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 
 // Oyuncu rütbesini hesaplayan akıllı algoritma
 function getRank(totalScore) {
-  if (totalScore >= 22000) return { title: "Zamanın Efendisi (Sports Time Lord) 👑", desc: "Tebrikler! Spor tarihini saniyesi ve koordinatıyla ezbere biliyorsunuz. Kusursuz bir gözlem yeteneği." };
+  if (totalScore >= 22000) return { title: "Haritanın Efendisi (Mapletics Lord) 👑", desc: "Tebrikler! Spor tarihini saniyesi ve koordinatıyla ezbere biliyorsunuz. Kusursuz bir gözlem yeteneği." };
   if (totalScore >= 15000) return { title: "Efsane Dedektif (Master Detective) 🕵️‍♂️", desc: "Harika bir performans! Görsel detayları yakalama konusunda üst düzey bir yeteneğe sahipsiniz." };
   if (totalScore >= 7000) return { title: "Yetenekli Gözlemci (Scout) 🎤", desc: "Başarılı bir mücadele. Detaylara hakimsiniz ancak mesafe tahminlerinde küçük sapmalar yaşadınız." };
   return { title: "Çaylak Dedektif (Rookie) 🔍", desc: "Daha fazla pratiğe ihtiyacınız var. Fotoğraflardaki mimari ve dönemsel ipuçlarına daha dikkatli odaklanmalısınız." };
@@ -221,7 +221,7 @@ export default function App() {
         <div style={{ width: '100%', maxWidth: '580px', backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '28px', padding: '48px 36px', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)' }}>
           <div style={{ fontSize: '56px', marginBottom: '16px' }}>🕵️‍♂️🏆</div>
           <h1 style={{ fontSize: '38px', fontWeight: '950', background: 'linear-gradient(to right, #f59e0b, #e11d48)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: '0 0 12px 0', letterSpacing: '-0.03em' }}>
-            SportsTime Detective
+            Mapletics
           </h1>
           <p style={{ color: '#94a3b8', fontSize: '15px', fontWeight: '500', margin: '0 0 36px 0', lineHeight: '1.6' }}>
             Açıklama veya ipucu bulunmamaktadır. Yalnızca görseldeki detayları analiz ederek stadyumu ve yılı tahmin ediniz.
@@ -264,7 +264,7 @@ export default function App() {
       
       {/* Üst Bilgi Barı */}
       <div style={{ width: '100%', maxWidth: '1000px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <h2 style={{ fontSize: '24px', fontWeight: '950', background: 'linear-gradient(to right, #f59e0b, #e11d48)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0 }}>SportsTime Detective</h2>
+        <h2 style={{ fontSize: '24px', fontWeight: '950', background: 'linear-gradient(to right, #f59e0b, #e11d48)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0 }}>Mapletics</h2>
         <span style={{ backgroundColor: '#1e293b', border: '1px solid #334155', padding: '6px 16px', borderRadius: '9999px', fontSize: '13px', fontWeight: '850', color: '#38bdf8' }}>
           ROUND: {currentQuestionIndex + 1} / 5
         </span>
