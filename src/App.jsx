@@ -129,30 +129,44 @@ function getRank(totalScore, lang) {
   return { title: lang === 'en' ? "Rookie 🐣" : "Çaylak 🐣", desc: lang === 'en' ? "More practice needed." : "Daha fazla pratik gerekli." };
 }
 
-// --- YENİ EKLENEN: AKILLI SORU SEÇME ALGORİTMASI ---
-function generateQuestions() {
-  // 1. Önce havuzu rastgele karıştır
+// --- GÜNCELLENEN: KATEGORİLİ SORU SEÇME ALGORİTMASI ---
+function generateQuestions(category = 'mixed') {
+  let pool = [];
+
+  // Mod 1: Fanatikler İçin (Sadece Futbol)
+  if (category === 'football') {
+    pool = ICONIC_MOMENTS.filter(q => q.sport.en === 'Football');
+    return [...pool].sort(() => 0.5 - Math.random()).slice(0, 5);
+  }
+  // Mod 2: Parke Tutkunları (Sadece Basketbol)
+  if (category === 'basketball') {
+    pool = ICONIC_MOMENTS.filter(q => q.sport.en === 'Basketball');
+    return [...pool].sort(() => 0.5 - Math.random()).slice(0, 5);
+  }
+  // Mod 3: Ana Akım Sporlar
+  if (category === 'mainstream') {
+    pool = ICONIC_MOMENTS.filter(q => ['Football', 'Basketball', 'Tennis'].includes(q.sport.en));
+    return [...pool].sort(() => 0.5 - Math.random()).slice(0, 5);
+  }
+
+  // Varsayılan: Karışık (Dünya Turu) Modu - Dengeli Algoritma
   const shuffled = [...ICONIC_MOMENTS].sort(() => 0.5 - Math.random());
   const selected = [];
-  const sportCounts = {}; // Hangi spordan kaç tane aldığımızı tutan sayaç
+  const sportCounts = {};
 
-  // 2. Karıştırılmış havuzdan kurallara göre 5 tane seç
   for (const q of shuffled) {
     if (selected.length === 5) break;
 
-    const sportKey = q.sport.en; // 'Football', 'Basketball', 'Tennis' vb.
-    // Futbol ve Basketbol için limit 2, diğerleri için 1
+    const sportKey = q.sport.en;
     const limit = (sportKey === 'Football' || sportKey === 'Basketball') ? 2 : 1;
     const currentCount = sportCounts[sportKey] || 0;
 
-    // Eğer o sporun limitini doldurmadıysak seçime ekle
     if (currentCount < limit) {
       selected.push(q);
       sportCounts[sportKey] = currentCount + 1;
     }
   }
   
-  // Güvenlik Subabı: Eğer havuz yetersiz kalır da 5'i dolduramazsa, rastgele kalanlardan tamamla
   if (selected.length < 5) {
       const remaining = shuffled.filter(q => !selected.includes(q)).slice(0, 5 - selected.length);
       selected.push(...remaining);
@@ -182,6 +196,10 @@ export default function App() {
 
   // Yeni State: Rehber Modal'ı
   const [showTutorial, setShowTutorial] = useState(false);
+
+  // YENİ STATE'LER: Kategori Modal'ı ve Bekleyen Aksiyon
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null); // 'single' veya 'multi'
 
   const [roomCode, setRoomCode] = useState('');
   const [joinCodeInput, setJoinCodeInput] = useState('');
@@ -236,13 +254,23 @@ export default function App() {
 
   const generateCode = () => Math.random().toString(36).substring(2, 6).toUpperCase();
 
-  const handleCreateRoom = async () => {
+  // YENİ: Oyuncu butonlara basınca önce Mod Seçim Ekranı Açılır
+  const onSinglePlayerClick = () => {
     if (!playerName.trim()) return setShowWarning(t("Lütfen bir kullanıcı adı belirleyin.", "Please enter a username."));
+    setPendingAction('single');
+    setShowCategoryModal(true);
+  };
+
+  const onCreateRoomClick = () => {
+    if (!playerName.trim()) return setShowWarning(t("Lütfen bir kullanıcı adı belirleyin.", "Please enter a username."));
+    setPendingAction('multi');
+    setShowCategoryModal(true);
+  };
+
+  // GÜNCELLENEN: Artık parametre olarak 'category' alıyor
+  const handleCreateRoom = async (category) => {
     const code = generateCode();
-    
-    // ESKİ HALİ: const shuffled = [...ICONIC_MOMENTS].sort(() => 0.5 - Math.random()).slice(0, 5);
-    // YENİ HALİ: Artık akıllı algoritmamızı kullanıyoruz
-    const selectedQuestions = generateQuestions();
+    const selectedQuestions = generateQuestions(category);
     
     await setDoc(doc(db, "rooms", code), {
       host: playerName,
@@ -253,6 +281,7 @@ export default function App() {
     setRoomCode(code);
     setIsHost(true);
     setGameMode('lobby');
+    setShowCategoryModal(false); // Modalı kapat
     playSynthSound(600, 'triangle', 0.2);
   };
 
@@ -279,18 +308,16 @@ export default function App() {
     }
   };
 
-  const startSinglePlayer = () => {
-    if (!playerName.trim()) return setShowWarning(t("Lütfen bir kullanıcı adı belirleyin.", "Please enter a username."));
-    
-    // ESKİ HALİ: const shuffled = [...ICONIC_MOMENTS].sort(() => 0.5 - Math.random()).slice(0, 5);
-    // YENİ HALİ: Artık akıllı algoritmamızı kullanıyoruz
-    const selectedQuestions = generateQuestions();
+  // GÜNCELLENEN: Artık parametre olarak 'category' alıyor
+  const startSinglePlayer = (category) => {
+    const selectedQuestions = generateQuestions(category);
     
     setActiveQuestions(selectedQuestions);
     setRoomCode(''); 
     setGameMode('playing');
     setCurrentQuestionIndex(0);
     setScore(0);
+    setShowCategoryModal(false); // Modalı kapat
     playSynthSound(600, 'triangle', 0.4);
   };
 
@@ -392,7 +419,7 @@ export default function App() {
           />
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <button onClick={startSinglePlayer} style={{ padding: '14px', fontSize: '16px', fontWeight: '600', backgroundColor: theme.text, color: theme.bg, border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
+            <button onClick={onSinglePlayerClick} style={{ padding: '14px', fontSize: '16px', fontWeight: '600', backgroundColor: theme.text, color: theme.bg, border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
               {t("Tek Oyunculu Oyna", "Play Single Player")}
             </button>
             
@@ -402,7 +429,7 @@ export default function App() {
               <div style={{ flex: 1, height: '1px', backgroundColor: theme.border }}></div>
             </div>
 
-            <button onClick={handleCreateRoom} style={{ padding: '14px', fontSize: '16px', fontWeight: '600', backgroundColor: theme.accent, color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
+            <button onClick={onCreateRoomClick} style={{ padding: '14px', fontSize: '16px', fontWeight: '600', backgroundColor: theme.accent, color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
               {t("Yeni Oda Kur", "Create Room")}
             </button>
             
@@ -469,6 +496,58 @@ export default function App() {
               <button onClick={() => setShowTutorial(false)} style={{ width: '100%', padding: '14px', marginTop: '32px', fontSize: '16px', fontWeight: '700', backgroundColor: theme.text, color: theme.bg, border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
                 {t("Anladım, Başla!", "Got it, Let's Play!")}
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* YENİ EKLENEN: KATEGORİ (OYUN MODU) SEÇİM PENCERESİ */}
+        {showCategoryModal && (
+          <div onClick={() => setShowCategoryModal(false)} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(5px)', zIndex: 4000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px', boxSizing: 'border-box' }}>
+            <div onClick={(e) => e.stopPropagation()} style={{ backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, borderRadius: '16px', padding: '32px', maxWidth: '500px', width: '100%', position: 'relative' }}>
+              <button onClick={() => setShowCategoryModal(false)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', color: theme.textMuted, fontSize: '20px', cursor: 'pointer' }}>✕</button>
+              
+              <h2 style={{ fontSize: '24px', fontWeight: '800', color: theme.text, margin: '0 0 8px 0' }}>
+                {t("Oyun Modunu Seç", "Select Game Mode")}
+              </h2>
+              <p style={{ margin: '0 0 24px 0', fontSize: '14px', color: theme.textMuted }}>
+                {t("Mücadele etmek istediğin soru havuzunu belirle.", "Choose the question pool you want to compete in.")}
+              </p>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                
+                <button onClick={() => pendingAction === 'single' ? startSinglePlayer('mixed') : handleCreateRoom('mixed')} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', backgroundColor: '#2a2a2a', border: `1px solid ${theme.border}`, borderRadius: '12px', cursor: 'pointer', textAlign: 'left', transition: 'border-color 0.2s' }}>
+                  <div style={{ fontSize: '32px' }}>🌍</div>
+                  <div>
+                    <h3 style={{ margin: '0 0 4px 0', fontSize: '16px', color: theme.text }}>{t("Karışık (Dünya Turu)", "Mixed (World Tour)")}</h3>
+                    <p style={{ margin: 0, fontSize: '13px', color: theme.textMuted }}>{t("Tüm branşlar. Dengeli algoritma devrede.", "All sports. Balanced algorithm is active.")}</p>
+                  </div>
+                </button>
+
+                <button onClick={() => pendingAction === 'single' ? startSinglePlayer('football') : handleCreateRoom('football')} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', backgroundColor: 'rgba(16, 185, 129, 0.1)', border: `1px solid rgba(16, 185, 129, 0.3)`, borderRadius: '12px', cursor: 'pointer', textAlign: 'left', transition: 'border-color 0.2s' }}>
+                  <div style={{ fontSize: '32px' }}>⚽</div>
+                  <div>
+                    <h3 style={{ margin: '0 0 4px 0', fontSize: '16px', color: theme.accent }}>{t("Sadece Futbol", "Football Only")}</h3>
+                    <p style={{ margin: 0, fontSize: '13px', color: theme.textMuted }}>{t("Fanatikler için. Sadece yeşil sahalar.", "For fanatics. Only from the green pitch.")}</p>
+                  </div>
+                </button>
+
+                <button onClick={() => pendingAction === 'single' ? startSinglePlayer('basketball') : handleCreateRoom('basketball')} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', backgroundColor: 'rgba(245, 158, 11, 0.1)', border: `1px solid rgba(245, 158, 11, 0.3)`, borderRadius: '12px', cursor: 'pointer', textAlign: 'left', transition: 'border-color 0.2s' }}>
+                  <div style={{ fontSize: '32px' }}>🏀</div>
+                  <div>
+                    <h3 style={{ margin: '0 0 4px 0', fontSize: '16px', color: '#f59e0b' }}>{t("Sadece Basketbol", "Basketball Only")}</h3>
+                    <p style={{ margin: 0, fontSize: '13px', color: theme.textMuted }}>{t("Parke tutkunları için efsanevi anlar.", "Unforgettable moments for court lovers.")}</p>
+                  </div>
+                </button>
+
+                <button onClick={() => pendingAction === 'single' ? startSinglePlayer('mainstream') : handleCreateRoom('mainstream')} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', backgroundColor: 'rgba(59, 130, 246, 0.1)', border: `1px solid rgba(59, 130, 246, 0.3)`, borderRadius: '12px', cursor: 'pointer', textAlign: 'left', transition: 'border-color 0.2s' }}>
+                  <div style={{ fontSize: '32px' }}>🏟️</div>
+                  <div>
+                    <h3 style={{ margin: '0 0 4px 0', fontSize: '16px', color: theme.primary }}>{t("Ana Akım Sporlar", "Mainstream")}</h3>
+                    <p style={{ margin: 0, fontSize: '13px', color: theme.textMuted }}>{t("Sadece Futbol, Basketbol ve Tenis sorulur.", "Only Football, Basketball, and Tennis.")}</p>
+                  </div>
+                </button>
+
+              </div>
             </div>
           </div>
         )}
