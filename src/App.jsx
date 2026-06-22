@@ -269,7 +269,7 @@ export default function App() {
         <div style={{ width: '100%', maxWidth: '500px', backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '28px', padding: '48px 36px', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)' }}>
           <div style={{ fontSize: '56px', marginBottom: '16px' }}>🏆</div>
           <h1 style={{ fontSize: '42px', fontWeight: '950', background: 'linear-gradient(to right, #f59e0b, #e11d48)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: '0 0 12px 0', letterSpacing: '-0.03em' }}>
-            Mapletics
+            Courtdinates
           </h1>
           <p style={{ color: '#94a3b8', fontSize: '15px', marginBottom: '32px' }}>{t("Haritaya giriş yapmak için bir isim belirleyin.", "Enter a name to access the map.")}</p>
           
@@ -359,7 +359,7 @@ export default function App() {
     return (
       <div style={{ backgroundColor: '#0f172a', color: '#f8fafc', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px 16px', fontFamily: 'sans-serif', boxSizing: 'border-box' }}>
         <div style={{ width: '100%', maxWidth: '1000px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <h2 style={{ fontSize: '24px', fontWeight: '950', background: 'linear-gradient(to right, #f59e0b, #e11d48)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0 }}>Mapletics</h2>
+          <h2 style={{ fontSize: '24px', fontWeight: '950', background: 'linear-gradient(to right, #f59e0b, #e11d48)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0 }}>Courtdinates</h2>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
             {roomCode && <span style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', padding: '4px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold' }}>{t("Oda:", "Room:")} {roomCode}</span>}
             <span style={{ backgroundColor: '#1e293b', border: '1px solid #334155', padding: '6px 16px', borderRadius: '9999px', fontSize: '13px', fontWeight: '850', color: '#38bdf8' }}>
