@@ -119,6 +119,9 @@ export default function App() {
   const [lang, setLang] = useState('tr'); 
   const t = (trText, enText) => lang === 'en' ? enText : trText;
 
+  // Yeni State: Rehber Modal'ı
+  const [showTutorial, setShowTutorial] = useState(false);
+
   const [roomCode, setRoomCode] = useState('');
   const [joinCodeInput, setJoinCodeInput] = useState('');
   const [roomData, setRoomData] = useState(null);
@@ -291,6 +294,14 @@ export default function App() {
     return (
       <div style={{ backgroundColor: theme.bg, minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px', fontFamily: theme.font, position: 'relative' }}>
         
+        {/* REHBER BUTONU (SOL ÜST) */}
+        <div style={{ position: 'absolute', top: '24px', left: '24px' }}>
+          <button onClick={() => setShowTutorial(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', border: `1px solid ${theme.border}`, backgroundColor: theme.cardBg, color: theme.text, fontWeight: '600', cursor: 'pointer', fontSize: '13px', transition: 'background 0.2s' }}>
+            <span>ℹ️</span> {t("Nasıl Oynanır?", "How to Play?")}
+          </button>
+        </div>
+
+        {/* DİL SEÇİM BUTONU (SAĞ ÜST) */}
         <div style={{ position: 'absolute', top: '24px', right: '24px', display: 'flex', gap: '4px', backgroundColor: theme.cardBg, padding: '4px', borderRadius: '8px', border: `1px solid ${theme.border}` }}>
           <button onClick={() => setLang('tr')} style={{ padding: '6px 12px', borderRadius: '6px', border: 'none', backgroundColor: lang === 'tr' ? theme.border : 'transparent', color: lang === 'tr' ? theme.text : theme.textMuted, fontWeight: '600', cursor: 'pointer', fontSize: '13px' }}>TR</button>
           <button onClick={() => setLang('en')} style={{ padding: '6px 12px', borderRadius: '6px', border: 'none', backgroundColor: lang === 'en' ? theme.border : 'transparent', color: lang === 'en' ? theme.text : theme.textMuted, fontWeight: '600', cursor: 'pointer', fontSize: '13px' }}>EN</button>
@@ -341,6 +352,57 @@ export default function App() {
             </div>
           </div>
         </div>
+
+        {/* NASIL OYNANIR PENCERESİ (MODAL) */}
+        {showTutorial && (
+          <div onClick={() => setShowTutorial(false)} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(5px)', zIndex: 4000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px', boxSizing: 'border-box' }}>
+            <div onClick={(e) => e.stopPropagation()} style={{ backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, borderRadius: '16px', padding: '32px', maxWidth: '500px', width: '100%', position: 'relative' }}>
+              <button onClick={() => setShowTutorial(false)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', color: theme.textMuted, fontSize: '20px', cursor: 'pointer' }}>✕</button>
+              
+              <h2 style={{ fontSize: '24px', fontWeight: '800', color: theme.text, margin: '0 0 24px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                ℹ️ {t("Nasıl Oynanır?", "How to Play?")}
+              </h2>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div style={{ display: 'flex', gap: '16px' }}>
+                  <div style={{ fontSize: '24px' }}>📍</div>
+                  <div>
+                    <h3 style={{ margin: '0 0 4px 0', fontSize: '16px', color: theme.accent }}>{t("Konumu Bul", "Find the Location")}</h3>
+                    <p style={{ margin: 0, fontSize: '14px', color: theme.textMuted, lineHeight: '1.5' }}>{t("Fotoğraftaki tarihi anın yaşandığı stadyumu veya şehri sağdaki haritadan işaretle.", "Pinpoint the stadium or city on the map where the historic moment took place.")}</p>
+                  </div>
+                </div>
+                
+                <div style={{ display: 'flex', gap: '16px' }}>
+                  <div style={{ fontSize: '24px' }}>⏳</div>
+                  <div>
+                    <h3 style={{ margin: '0 0 4px 0', fontSize: '16px', color: theme.accent }}>{t("Yılı Tahmin Et", "Guess the Year")}</h3>
+                    <p style={{ margin: 0, fontSize: '14px', color: theme.textMuted, lineHeight: '1.5' }}>{t("Olayın yaşandığı yılı ekranın altındaki zaman çizelgesinden (slider) seç.", "Select the year the event occurred using the timeline slider at the bottom.")}</p>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '16px' }}>
+                  <div style={{ fontSize: '24px' }}>⚔️</div>
+                  <div>
+                    <h3 style={{ margin: '0 0 4px 0', fontSize: '16px', color: theme.primary }}>{t("Arkadaşlarınla Yarış", "Compete with Friends")}</h3>
+                    <p style={{ margin: 0, fontSize: '14px', color: theme.textMuted, lineHeight: '1.5' }}>{t("Yeni Oda Kur'a basıp 4 haneli kodu arkadaşlarına gönder. Aynı anda aynı fotoğrafları tahmin ederek rekabet et!", "Click 'Create Room', share the 4-letter code with friends, and compete simultaneously on the same photos!")}</p>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '16px', marginTop: '8px', paddingTop: '20px', borderTop: `1px solid ${theme.border}` }}>
+                  <div style={{ fontSize: '24px' }}>🏆</div>
+                  <div>
+                    <h3 style={{ margin: '0 0 4px 0', fontSize: '16px', color: theme.text }}>{t("Puanlama", "Scoring")}</h3>
+                    <p style={{ margin: 0, fontSize: '14px', color: theme.textMuted, lineHeight: '1.5' }}>{t("Doğru yıla ve konuma ne kadar yaklaşırsan o kadar çok puan (Maks: 5000) kazanırsın.", "The closer you are to the exact year and location, the more points you earn (Max: 5000 per round).")}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <button onClick={() => setShowTutorial(false)} style={{ width: '100%', padding: '14px', marginTop: '32px', fontSize: '16px', fontWeight: '700', backgroundColor: theme.text, color: theme.bg, border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
+                {t("Anladım, Başla!", "Got it, Let's Play!")}
+              </button>
+            </div>
+          </div>
+        )}
 
         {showWarning && (
           <div style={{ position: 'fixed', bottom: '24px', backgroundColor: '#ef4444', color: 'white', padding: '12px 24px', borderRadius: '8px', fontSize: '14px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
@@ -472,7 +534,7 @@ export default function App() {
                     <span>+{geoPoints + timePoints}</span>
                   </div>
 
-                  {/* YENİ EKLENEN TRİVİA (BİLGİ) KUTUSU */}
+                  {/* Neden Efsane? BİLGİ KUTUSU */}
                   <div style={{ marginTop: '8px', padding: '16px', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderLeft: `4px solid ${theme.primary}`, borderRadius: '0 8px 8px 0' }}>
                     <h4 style={{ margin: '0 0 8px 0', fontSize: '14px', color: theme.primary, display: 'flex', alignItems: 'center', gap: '6px' }}>
                       💡 {t("Neden Efsane?", "Why is it Legendary?")}
