@@ -91,17 +91,14 @@ export default function App() {
   const [gameMode, setGameMode] = useState('menu'); // menu, lobby, playing, result
   const [playerName, setPlayerName] = useState('');
   
-  // DİL (LANGUAGE) STATE'İ
   const [lang, setLang] = useState('tr'); 
   const t = (trText, enText) => lang === 'en' ? enText : trText;
 
-  // Multiplayer State'leri
   const [roomCode, setRoomCode] = useState('');
   const [joinCodeInput, setJoinCodeInput] = useState('');
   const [roomData, setRoomData] = useState(null);
   const [isHost, setIsHost] = useState(false);
 
-  // Oyun İçi State'ler
   const [activeQuestions, setActiveQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -112,7 +109,6 @@ export default function App() {
   const [geoPoints, setGeoPoints] = useState(0);
   const [timePoints, setTimePoints] = useState(0);
 
-  // UI State'leri
   const [isZoomed, setIsZoomed] = useState(false);
   const [showWarning, setShowWarning] = useState(null);
   const [satelliteMode, setSatelliteMode] = useState(false);
@@ -256,56 +252,66 @@ export default function App() {
     }
   };
 
+  const theme = {
+    bg: '#121212',          // Zifiri Karanlık Ana Arka Plan
+    cardBg: '#1e1e1e',      // Mat Kart Arka Planı
+    border: '#2c2c2c',      // İnce Çizgiler (Çok mat)
+    text: '#ffffff',        // Ana Metin (Parlak beyaz)
+    textMuted: '#9ca3af',   // Soluk Gri Metin
+    accent: '#10b981',      // Zümrüt Yeşili (Başarı/Aksiyon)
+    primary: '#3b82f6',     // Canlı Mavi (Bilgi/İleri)
+    font: 'system-ui, -apple-system, sans-serif'
+  };
+
   if (gameMode === 'menu') {
     return (
-      <div style={{ backgroundColor: '#0f172a', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '16px', fontFamily: 'sans-serif', boxSizing: 'border-box', position: 'relative' }}>
+      <div style={{ backgroundColor: theme.bg, minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px', fontFamily: theme.font, position: 'relative' }}>
         
-        {/* DİL SEÇİM BUTONU (Language Toggle) */}
-        <div style={{ position: 'absolute', top: '20px', right: '20px', display: 'flex', gap: '4px', backgroundColor: '#1e293b', padding: '4px', borderRadius: '12px', border: '1px solid #334155' }}>
-          <button onClick={() => setLang('tr')} style={{ padding: '8px 14px', borderRadius: '8px', border: 'none', backgroundColor: lang === 'tr' ? '#38bdf8' : 'transparent', color: lang === 'tr' ? 'white' : '#94a3b8', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s', fontSize: '13px' }}>TR</button>
-          <button onClick={() => setLang('en')} style={{ padding: '8px 14px', borderRadius: '8px', border: 'none', backgroundColor: lang === 'en' ? '#38bdf8' : 'transparent', color: lang === 'en' ? 'white' : '#94a3b8', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s', fontSize: '13px' }}>EN</button>
+        <div style={{ position: 'absolute', top: '24px', right: '24px', display: 'flex', gap: '4px', backgroundColor: theme.cardBg, padding: '4px', borderRadius: '8px', border: `1px solid ${theme.border}` }}>
+          <button onClick={() => setLang('tr')} style={{ padding: '6px 12px', borderRadius: '6px', border: 'none', backgroundColor: lang === 'tr' ? theme.border : 'transparent', color: lang === 'tr' ? theme.text : theme.textMuted, fontWeight: '600', cursor: 'pointer', fontSize: '13px' }}>TR</button>
+          <button onClick={() => setLang('en')} style={{ padding: '6px 12px', borderRadius: '6px', border: 'none', backgroundColor: lang === 'en' ? theme.border : 'transparent', color: lang === 'en' ? theme.text : theme.textMuted, fontWeight: '600', cursor: 'pointer', fontSize: '13px' }}>EN</button>
         </div>
 
-        <div style={{ width: '100%', maxWidth: '500px', backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '28px', padding: '48px 36px', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)' }}>
-          <div style={{ fontSize: '56px', marginBottom: '16px' }}>🏆</div>
-          <h1 style={{ fontSize: '42px', fontWeight: '950', background: 'linear-gradient(to right, #f59e0b, #e11d48)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: '0 0 12px 0', letterSpacing: '-0.03em' }}>
-            Courtdinates
-          </h1>
-          <p style={{ color: '#94a3b8', fontSize: '15px', marginBottom: '32px' }}>{t("Haritaya giriş yapmak için bir isim belirleyin.", "Enter a name to access the map.")}</p>
+        <div style={{ width: '100%', maxWidth: '440px', backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, borderRadius: '16px', padding: '40px', boxSizing: 'border-box' }}>
+          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+            <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}>📍</span>
+            <h1 style={{ fontSize: '32px', fontWeight: '800', color: theme.text, margin: '0 0 8px 0', letterSpacing: '-1px' }}>Courtdinates</h1>
+            <p style={{ color: theme.textMuted, fontSize: '14px', margin: 0 }}>{t("Tarihi spor anlarını haritada bul.", "Locate historic sports moments on the map.")}</p>
+          </div>
           
           <input 
             type="text" 
             placeholder={t("Kullanıcı Adı", "Username")} 
             value={playerName}
             onChange={(e) => setPlayerName(e.target.value)}
-            style={{ width: '100%', padding: '16px', fontSize: '18px', backgroundColor: '#0f172a', border: '2px solid #334155', borderRadius: '16px', color: 'white', marginBottom: '24px', textAlign: 'center', boxSizing: 'border-box', outline: 'none' }}
+            style={{ width: '100%', padding: '14px 16px', fontSize: '16px', backgroundColor: '#2a2a2a', border: `1px solid ${theme.border}`, borderRadius: '8px', color: theme.text, marginBottom: '24px', boxSizing: 'border-box', outline: 'none', transition: 'border-color 0.2s' }}
           />
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <button onClick={startSinglePlayer} style={{ padding: '16px', fontSize: '16px', fontWeight: 'bold', backgroundColor: '#334155', color: 'white', border: 'none', borderRadius: '16px', cursor: 'pointer', transition: 'all 0.2s' }}>
-              👤 {t("Tek Oyunculu", "Single Player")}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <button onClick={startSinglePlayer} style={{ padding: '14px', fontSize: '16px', fontWeight: '600', backgroundColor: theme.text, color: theme.bg, border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
+              {t("Tek Oyunculu Oyna", "Play Single Player")}
             </button>
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '10px 0' }}>
-              <div style={{ flex: 1, height: '1px', backgroundColor: '#334155' }}></div>
-              <span style={{ color: '#64748b', fontSize: '12px', fontWeight: 'bold', letterSpacing: '1px' }}>{t("ÇOK OYUNCULU MOD", "MULTIPLAYER MODE")}</span>
-              <div style={{ flex: 1, height: '1px', backgroundColor: '#334155' }}></div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '16px 0' }}>
+              <div style={{ flex: 1, height: '1px', backgroundColor: theme.border }}></div>
+              <span style={{ color: theme.textMuted, fontSize: '12px', fontWeight: '600' }}>{t("ÇOK OYUNCULU", "MULTIPLAYER")}</span>
+              <div style={{ flex: 1, height: '1px', backgroundColor: theme.border }}></div>
             </div>
 
-            <button onClick={handleCreateRoom} style={{ padding: '16px', fontSize: '16px', fontWeight: 'bold', background: 'linear-gradient(to right, #10b981, #059669)', color: 'white', border: 'none', borderRadius: '16px', cursor: 'pointer', boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)' }}>
-              ⚔️ {t("Yeni Oda Oluştur", "Create New Room")}
+            <button onClick={handleCreateRoom} style={{ padding: '14px', fontSize: '16px', fontWeight: '600', backgroundColor: theme.accent, color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
+              {t("Yeni Oda Kur", "Create Room")}
             </button>
             
             <div style={{ display: 'flex', gap: '8px' }}>
               <input 
                 type="text" 
-                placeholder={t("Oda Kodu", "Room Code")} 
+                placeholder={t("Oda Kodu", "Code")} 
                 value={joinCodeInput}
                 onChange={(e) => setJoinCodeInput(e.target.value.toUpperCase())}
-                style={{ flex: 1, padding: '16px', fontSize: '16px', backgroundColor: '#0f172a', border: '2px solid #334155', borderRadius: '16px', color: 'white', textAlign: 'center', textTransform: 'uppercase', outline: 'none' }}
+                style={{ flex: 1, padding: '14px', fontSize: '16px', backgroundColor: '#2a2a2a', border: `1px solid ${theme.border}`, borderRadius: '8px', color: theme.text, textAlign: 'center', textTransform: 'uppercase', outline: 'none' }}
                 maxLength={4}
               />
-              <button onClick={handleJoinRoom} style={{ padding: '16px 24px', fontSize: '16px', fontWeight: 'bold', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '16px', cursor: 'pointer' }}>
+              <button onClick={handleJoinRoom} style={{ padding: '14px 24px', fontSize: '16px', fontWeight: '600', backgroundColor: '#2a2a2a', color: theme.text, border: `1px solid ${theme.border}`, borderRadius: '8px', cursor: 'pointer' }}>
                 {t("Katıl", "Join")}
               </button>
             </div>
@@ -313,9 +319,9 @@ export default function App() {
         </div>
 
         {showWarning && (
-          <div style={{ position: 'fixed', bottom: '24px', backgroundColor: '#ef4444', color: 'white', padding: '12px 24px', borderRadius: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.3)', zIndex: 5000 }}>
-            <span>⚠️ {showWarning}</span>
-            <button onClick={() => setShowWarning(null)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}>X</button>
+          <div style={{ position: 'fixed', bottom: '24px', backgroundColor: '#ef4444', color: 'white', padding: '12px 24px', borderRadius: '8px', fontSize: '14px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+            <span>{showWarning}</span>
+            <button onClick={() => setShowWarning(null)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}>✕</button>
           </div>
         )}
       </div>
@@ -324,30 +330,35 @@ export default function App() {
 
   if (gameMode === 'lobby') {
     return (
-      <div style={{ backgroundColor: '#0f172a', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '16px', fontFamily: 'sans-serif' }}>
-        <div style={{ width: '100%', maxWidth: '500px', backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '28px', padding: '48px 36px', textAlign: 'center' }}>
-          <h2 style={{ fontSize: '24px', color: '#94a3b8', margin: '0 0 16px 0' }}>{t("Oda Kodu", "Room Code")}</h2>
-          <div style={{ fontSize: '56px', fontWeight: '950', letterSpacing: '8px', color: '#f59e0b', marginBottom: '32px', backgroundColor: '#0f172a', padding: '16px', borderRadius: '16px', border: '2px dashed #475569' }}>
+      <div style={{ backgroundColor: theme.bg, minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px', fontFamily: theme.font }}>
+        <div style={{ width: '100%', maxWidth: '440px', backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, borderRadius: '16px', padding: '40px', textAlign: 'center', boxSizing: 'border-box' }}>
+          <h2 style={{ fontSize: '16px', color: theme.textMuted, margin: '0 0 12px 0', fontWeight: '600', textTransform: 'uppercase' }}>{t("Oda Kodu", "Room Code")}</h2>
+          <div style={{ fontSize: '48px', fontWeight: '800', letterSpacing: '4px', color: theme.text, marginBottom: '32px' }}>
             {roomCode}
           </div>
           
-          <h3 style={{ color: '#f8fafc', fontSize: '18px', marginBottom: '16px', textAlign: 'left' }}>{t("Lobideki Oyuncular:", "Players in Lobby:")}</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '32px' }}>
-            {roomData?.players && Object.keys(roomData.players).map((p, i) => (
-              <div key={i} style={{ backgroundColor: p === playerName ? 'rgba(16, 185, 129, 0.2)' : '#0f172a', border: p === playerName ? '1px solid #10b981' : '1px solid #334155', padding: '14px', borderRadius: '12px', color: 'white', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span>{p === roomData.host ? "👑" : "🎮"}</span>
-                <span>{p} {p === playerName && t("(Sen)", "(You)")}</span>
-              </div>
-            ))}
+          <div style={{ backgroundColor: '#2a2a2a', borderRadius: '8px', padding: '16px', marginBottom: '32px' }}>
+            <h3 style={{ color: theme.textMuted, fontSize: '14px', margin: '0 0 16px 0', textAlign: 'left', fontWeight: '600' }}>{t("Oyuncular", "Players")}</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {roomData?.players && Object.keys(roomData.players).map((p, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: theme.text, fontSize: '15px', fontWeight: '500' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: theme.accent }}></div>
+                    {p} {p === playerName && t("(Sen)", "(You)")}
+                  </div>
+                  {p === roomData.host && <span style={{ fontSize: '12px', color: theme.textMuted }}>HOST</span>}
+                </div>
+              ))}
+            </div>
           </div>
 
           {isHost ? (
-            <button onClick={startMultiplayerGame} style={{ width: '100%', padding: '18px', fontSize: '18px', fontWeight: 'bold', background: 'linear-gradient(to right, #f59e0b, #e11d48)', color: 'white', border: 'none', borderRadius: '16px', cursor: 'pointer', boxShadow: '0 4px 15px rgba(225, 29, 72, 0.3)' }}>
+            <button onClick={startMultiplayerGame} style={{ width: '100%', padding: '16px', fontSize: '16px', fontWeight: '700', backgroundColor: theme.accent, color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
               {t("Oyunu Başlat", "Start Game")}
             </button>
           ) : (
-            <div style={{ padding: '18px', backgroundColor: 'rgba(56, 189, 248, 0.1)', border: '1px solid #38bdf8', borderRadius: '16px', color: '#38bdf8', fontWeight: 'bold', fontSize: '16px', animation: 'pulse 2s infinite' }}>
-              {t("Oda sahibinin başlatması bekleniyor...", "Waiting for host to start...")}
+            <div style={{ padding: '16px', color: theme.textMuted, fontSize: '15px', fontWeight: '500' }}>
+              {t("Kurucunun başlatması bekleniyor...", "Waiting for host to start...")}
             </div>
           )}
         </div>
@@ -357,42 +368,51 @@ export default function App() {
 
   if (gameMode === 'playing') {
     return (
-      <div style={{ backgroundColor: '#0f172a', color: '#f8fafc', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px 16px', fontFamily: 'sans-serif', boxSizing: 'border-box' }}>
-        <div style={{ width: '100%', maxWidth: '1000px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <h2 style={{ fontSize: '24px', fontWeight: '950', background: 'linear-gradient(to right, #f59e0b, #e11d48)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0 }}>Courtdinates</h2>
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-            {roomCode && <span style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', padding: '4px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold' }}>{t("Oda:", "Room:")} {roomCode}</span>}
-            <span style={{ backgroundColor: '#1e293b', border: '1px solid #334155', padding: '6px 16px', borderRadius: '9999px', fontSize: '13px', fontWeight: '850', color: '#38bdf8' }}>
-              ROUND: {currentQuestionIndex + 1} / 5
-            </span>
+      <div style={{ backgroundColor: theme.bg, color: theme.text, minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: theme.font }}>
+        
+        {/* ÜST BİLGİ ÇUBUĞU (HEADER) */}
+        <div style={{ height: '60px', borderBottom: `1px solid ${theme.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 24px', backgroundColor: theme.cardBg }}>
+          <h2 style={{ fontSize: '20px', fontWeight: '800', margin: 0, letterSpacing: '-0.5px' }}>Courtdinates</h2>
+          <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+              <span style={{ fontSize: '11px', color: theme.textMuted, fontWeight: '600', letterSpacing: '1px' }}>{t("TUR", "ROUND")}</span>
+              <span style={{ fontSize: '16px', fontWeight: '700' }}>{currentQuestionIndex + 1} / 5</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+              <span style={{ fontSize: '11px', color: theme.textMuted, fontWeight: '600', letterSpacing: '1px' }}>{t("SKOR", "SCORE")}</span>
+              <span style={{ fontSize: '16px', fontWeight: '700', color: theme.accent }}>{score}</span>
+            </div>
           </div>
         </div>
 
-        <div style={{ width: '100%', maxWidth: '1000px', backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '24px', padding: '20px', display: 'flex', flexWrap: 'wrap', gap: '20px', boxSizing: 'border-box' }}>
+        {/* ANA OYUN ALANI (BÖLÜNMÜŞ EKRAN) */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', flex: 1, padding: '24px', gap: '24px', boxSizing: 'border-box', maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
           
-          <div style={{ flex: '1 1 420px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ padding: '5px 12px', backgroundColor: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', border: '1px solid rgba(245, 158, 11, 0.2)', borderRadius: '9999px', fontSize: '11px', fontWeight: '750' }}>
-                🎯 {currentQuestion.sport[lang]}
-              </span>
-            </div>
-            <div onClick={() => setIsZoomed(true)} style={{ overflow: 'hidden', borderRadius: '16px', border: '2px solid #475569', height: '340px', position: 'relative', cursor: 'zoom-in', backgroundColor: '#0f172a' }}>
-              <img src={currentQuestion.localPhotoUrl} alt="İpucu" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          {/* SOL TARAF: FOTOĞRAF ALANI */}
+          <div style={{ flex: '1 1 500px', display: 'flex', flexDirection: 'column' }}>
+            <div onClick={() => setIsZoomed(true)} style={{ flex: 1, minHeight: '400px', backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, borderRadius: '12px', overflow: 'hidden', position: 'relative', cursor: 'zoom-in' }}>
+              <img src={currentQuestion.localPhotoUrl} alt="Moment" style={{ width: '100%', height: '100%', objectFit: 'contain', backgroundColor: '#000' }} />
+              <div style={{ position: 'absolute', top: '16px', left: '16px', backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', padding: '6px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }}>
+                {currentQuestion.sport[lang]}
+              </div>
             </div>
           </div>
 
-          <div style={{ flex: '1 1 450px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div style={{ width: '100%', height: '280px', borderRadius: '18px', overflow: 'hidden', border: '2px solid #475569', position: 'relative' }}>
-              <button onClick={() => setSatelliteMode(!satelliteMode)} style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 1000, backgroundColor: '#1e293b', border: '1px solid #475569', color: 'white', padding: '6px 12px', borderRadius: '8px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }}>
-                🗺️ {satelliteMode ? t("Karanlık Tema", "Dark Map") : t("Uydu Görünümü", "Satellite")}
+          {/* SAĞ TARAF: HARİTA VE KONTROLLER */}
+          <div style={{ flex: '1 1 400px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            
+            {/* HARİTA */}
+            <div style={{ height: '320px', backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, borderRadius: '12px', overflow: 'hidden', position: 'relative' }}>
+              <button onClick={() => setSatelliteMode(!satelliteMode)} style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 1000, backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, color: theme.text, padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
+                🗺️ {satelliteMode ? t("Karanlık", "Dark") : t("Uydu", "Satellite")}
               </button>
-              <MapContainer center={[25, 0]} zoom={1} style={{ width: '100%', height: '100%', backgroundColor: '#0f172a' }} worldCopyJump={true}>
+              <MapContainer center={[25, 0]} zoom={1} style={{ width: '100%', height: '100%', backgroundColor: '#0f172a' }} worldCopyJump={true} zoomControl={false}>
                 <TileLayer url={satelliteMode ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}' : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'} />
                 {selectedLocation && <Marker position={selectedLocation} icon={customMarkerIcon}></Marker>}
                 {showAnswer && selectedLocation && (
                   <>
-                    <Polyline positions={[selectedLocation, actualLocation]} color="#f59e0b" weight={4} dashArray="6, 8" />
-                    <Circle center={actualLocation} radius={250000} pathOptions={{ color: '#10b981', fillColor: '#10b981', fillOpacity: 0.2 }} />
+                    <Polyline positions={[selectedLocation, actualLocation]} color={theme.text} weight={2} dashArray="4, 6" />
+                    <Circle center={actualLocation} radius={250000} pathOptions={{ color: theme.accent, fillColor: theme.accent, fillOpacity: 0.2 }} />
                   </>
                 )}
                 <MapClickHandler />
@@ -400,81 +420,95 @@ export default function App() {
               </MapContainer>
             </div>
 
-            <div style={{ backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '18px', padding: '16px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                <span style={{ fontSize: '13px', color: '#94a3b8', fontWeight: '700' }}>{t("Yıl Tahmini:", "Year Guess:")}</span>
-                <span style={{ fontSize: '18px', color: '#38bdf8', fontWeight: '900' }}>{selectedYear}</span>
+            {/* YIL ÇİZELGESİ (TIMELINE) */}
+            <div style={{ backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '24px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '16px' }}>
+                <span style={{ fontSize: '13px', color: theme.textMuted, fontWeight: '600', textTransform: 'uppercase' }}>{t("Yıl Tahmini", "Guess the Year")}</span>
+                <span style={{ fontSize: '28px', fontWeight: '800', color: theme.text, lineHeight: '1' }}>{selectedYear}</span>
               </div>
-              <input type="range" min="1900" max="2026" value={selectedYear} disabled={showAnswer} onChange={(e) => setSelectedYear(Number(e.target.value))} style={{ width: '100%', accentColor: '#38bdf8' }} />
+              <input 
+                type="range" min="1900" max="2026" value={selectedYear} disabled={showAnswer} 
+                onChange={(e) => setSelectedYear(Number(e.target.value))} 
+                style={{ width: '100%', height: '6px', backgroundColor: '#333', borderRadius: '4px', outline: 'none', accentColor: theme.text, cursor: showAnswer ? 'default' : 'pointer' }} 
+              />
+              
+              {/* SONUÇ BİLGİLERİ (CEVAP VERİLDİKTEN SONRA AÇILIR) */}
               {showAnswer && (
-                <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px dashed #334155', fontSize: '13px', color: '#94a3b8' }}>
-                  {t("Doğru Yıl:", "Correct Year:")} <strong style={{ color: '#10b981' }}>{currentQuestion.year}</strong> | {t("Doğru Konum:", "Correct Location:")} {currentQuestion.locationName[lang]}
+                <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: `1px solid ${theme.border}`, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                    <span style={{ color: theme.textMuted }}>{t("Doğru Konum:", "Actual Location:")}</span>
+                    <strong style={{ textAlign: 'right' }}>{currentQuestion.locationName[lang]}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                    <span style={{ color: theme.textMuted }}>{t("Doğru Yıl:", "Actual Year:")}</span>
+                    <strong>{currentQuestion.year}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: theme.accent, fontWeight: '700', marginTop: '4px' }}>
+                    <span>{t("Kazanılan Puan:", "Points Earned:")}</span>
+                    <span>+{geoPoints + timePoints}</span>
+                  </div>
                 </div>
               )}
             </div>
-          </div>
-        </div>
 
-        <div style={{ width: '100%', maxWidth: '1000px', backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '20px', padding: '16px', marginTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-            <div style={{ backgroundColor: '#0f172a', padding: '8px 16px', borderRadius: '12px', border: '1px solid #334155', textAlign: 'center' }}>
-              <span style={{ color: '#64748b', fontSize: '10px', display: 'block', fontWeight: '700', letterSpacing: '1px' }}>{t("SKOR", "SCORE")}</span>
-              <span style={{ fontSize: '22px', fontWeight: '950', color: '#10b981' }}>{score}</span>
-            </div>
-            {showAnswer && (
-              <div style={{ fontSize: '12px', color: '#cbd5e1' }}>
-                📍 +{geoPoints} {t("Puan", "Pts")} <br/> ⏳ +{timePoints} {t("Puan", "Pts")}
-              </div>
-            )}
-          </div>
-          <div>
+            {/* AKSİYON BUTONU */}
             {!showAnswer ? (
-              <button onClick={handleGuess} style={{ padding: '12px 28px', fontSize: '15px', fontWeight: '900', color: 'white', background: 'linear-gradient(to right, #10b981, #059669)', border: 'none', borderRadius: '14px', cursor: 'pointer', boxShadow: '0 4px 15px rgba(16, 185, 129, 0.2)' }}>{t("Onayla", "Confirm")}</button>
+              <button onClick={handleGuess} style={{ width: '100%', padding: '18px', fontSize: '16px', fontWeight: '700', backgroundColor: theme.text, color: theme.bg, border: 'none', borderRadius: '12px', cursor: 'pointer', transition: 'opacity 0.2s' }}>
+                {t("Tahmini Onayla", "Make Guess")}
+              </button>
             ) : (
-              <button onClick={handleNext} style={{ padding: '12px 28px', fontSize: '15px', fontWeight: '900', color: 'white', backgroundColor: '#3b82f6', border: 'none', borderRadius: '14px', cursor: 'pointer', boxShadow: '0 4px 15px rgba(59, 130, 246, 0.2)' }}>{currentQuestionIndex === 4 ? t("Sonuçları Gör", "See Results") : t("Sıradaki Konum ➔", "Next Location ➔")}</button>
+              <button onClick={handleNext} style={{ width: '100%', padding: '18px', fontSize: '16px', fontWeight: '700', backgroundColor: theme.primary, color: '#fff', border: 'none', borderRadius: '12px', cursor: 'pointer' }}>
+                {currentQuestionIndex === 4 ? t("Sonuçları Gör", "View Summary") : t("Sıradaki Tur", "Next Round")}
+              </button>
             )}
+
           </div>
         </div>
 
-        {isZoomed && <div onClick={() => setIsZoomed(false)} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(15, 23, 42, 0.96)', zIndex: 3000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}><img src={currentQuestion.localPhotoUrl} style={{ maxWidth: '100%', maxHeight: '90%', borderRadius: '20px', border: '3px solid #475569', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}/></div>}
+        {/* FOTOĞRAF ZOOM MODALI */}
+        {isZoomed && (
+          <div onClick={() => setIsZoomed(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.9)', zIndex: 3000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '24px' }}>
+            <img src={currentQuestion.localPhotoUrl} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}/>
+            <div style={{ position: 'absolute', top: '24px', right: '24px', color: '#fff', fontSize: '14px', fontWeight: '600', backgroundColor: 'rgba(255,255,255,0.2)', padding: '8px 16px', borderRadius: '20px', cursor: 'pointer' }}>
+              {t("Kapat", "Close")}
+            </div>
+          </div>
+        )}
       </div>
     );
   }
 
   if (gameMode === 'result') {
     return (
-      <div style={{ backgroundColor: '#0f172a', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '16px', fontFamily: 'sans-serif' }}>
-        <div style={{ width: '100%', maxWidth: '500px', backgroundColor: '#1e293b', border: '2px solid #334155', borderRadius: '28px', padding: '36px 28px', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
-          <span style={{ fontSize: '64px' }}>🏆</span>
-          <h2 style={{ fontSize: '28px', fontWeight: '950', color: '#10b981', margin: '12px 0 24px 0' }}>{t("Oyun Tamamlandı", "Game Completed")}</h2>
+      <div style={{ backgroundColor: theme.bg, minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px', fontFamily: theme.font }}>
+        <div style={{ width: '100%', maxWidth: '500px', backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, borderRadius: '16px', padding: '40px', boxSizing: 'border-box' }}>
           
-          {roomCode && roomData?.players ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
-              <h3 style={{ color: '#94a3b8', fontSize: '14px', margin: 0, textAlign: 'left', paddingLeft: '8px' }}>{t("Maç Sonucu (Oda: ", "Match Result (Room: ")}{roomCode})</h3>
-              {Object.entries(roomData.players)
-                .sort(([, a], [, b]) => b.score - a.score) 
-                .map(([pName, pData], index) => (
-                  <div key={index} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: pName === playerName ? 'rgba(56, 189, 248, 0.15)' : '#0f172a', padding: '16px', borderRadius: '16px', border: pName === playerName ? '1px solid #38bdf8' : '1px solid #334155' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span style={{ fontSize: '20px', fontWeight: '900', color: index === 0 ? '#f59e0b' : '#64748b' }}>#{index + 1}</span>
-                      <span style={{ color: 'white', fontWeight: 'bold', fontSize: '16px' }}>{pName} {pName === playerName && t("(Sen)", "(You)")}</span>
+          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+            <h2 style={{ fontSize: '20px', color: theme.textMuted, fontWeight: '600', margin: '0 0 8px 0', textTransform: 'uppercase' }}>{t("Oyun Özeti", "Game Summary")}</h2>
+            <div style={{ fontSize: '56px', fontWeight: '800', color: theme.accent, lineHeight: '1' }}>{score}</div>
+            <p style={{ color: theme.text, fontSize: '16px', fontWeight: '500', marginTop: '12px' }}>{t("Klasman:", "Rank:")} {getRank(score, lang).title}</p>
+          </div>
+          
+          {roomCode && roomData?.players && (
+            <div style={{ marginBottom: '32px' }}>
+              <h3 style={{ color: theme.textMuted, fontSize: '13px', margin: '0 0 12px 0', textTransform: 'uppercase', fontWeight: '600' }}>{t("Sıralama", "Leaderboard")}</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {Object.entries(roomData.players)
+                  .sort(([, a], [, b]) => b.score - a.score) 
+                  .map(([pName, pData], index) => (
+                    <div key={index} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: pName === playerName ? '#2a2a2a' : 'transparent', padding: '12px 16px', borderRadius: '8px', border: `1px solid ${pName === playerName ? theme.border : 'transparent'}` }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: theme.text, fontWeight: '600' }}>
+                        <span style={{ color: index === 0 ? theme.accent : theme.textMuted }}>#{index + 1}</span>
+                        <span>{pName}</span>
+                      </div>
+                      <span style={{ fontWeight: '700', color: theme.text }}>{pData.score}</span>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <span style={{ display: 'block', fontSize: '20px', fontWeight: '950', color: '#10b981' }}>{pData.score}</span>
-                      <span style={{ fontSize: '10px', color: pData.finished ? '#10b981' : '#ef4444', fontWeight: 'bold' }}>{pData.finished ? t("Tamamladı", "Finished") : t("Oynuyor...", "Playing...")}</span>
-                    </div>
-                  </div>
-              ))}
-            </div>
-          ) : (
-            <div style={{ backgroundColor: '#0f172a', borderRadius: '16px', padding: '24px', marginBottom: '24px', border: '1px solid #334155' }}>
-              <span style={{ color: '#64748b', fontSize: '12px', fontWeight: '700', display: 'block', marginBottom: '8px', letterSpacing: '1px' }}>{t("TOPLAM SKOR", "TOTAL SCORE")}</span>
-              <span style={{ fontSize: '48px', fontWeight: '950', color: '#f59e0b' }}>{score}</span>
-              <p style={{ color: '#38bdf8', fontSize: '14px', fontWeight: 'bold', marginTop: '12px' }}>{t("Klasman:", "Rank:")} {getRank(score, lang).title}</p>
+                ))}
+              </div>
             </div>
           )}
 
-          <button onClick={() => { setGameMode('menu'); setRoomCode(''); }} style={{ width: '100%', padding: '16px', fontSize: '16px', fontWeight: 'bold', backgroundColor: '#334155', color: 'white', border: 'none', borderRadius: '16px', cursor: 'pointer', transition: 'all 0.2s' }}>
+          <button onClick={() => { setGameMode('menu'); setRoomCode(''); }} style={{ width: '100%', padding: '16px', fontSize: '16px', fontWeight: '600', backgroundColor: '#2a2a2a', color: theme.text, border: `1px solid ${theme.border}`, borderRadius: '8px', cursor: 'pointer' }}>
             {t("Ana Menüye Dön", "Return to Main Menu")}
           </button>
         </div>
