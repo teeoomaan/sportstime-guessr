@@ -1,0 +1,28 @@
+[33mda2f0c3[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m fix: landing screen
+[33m7b77b4d[m mobil uyumluluk düzeltmeleri
+[33me562c2b[m feat: courtdinates singleplayer tamalandi, efsanevi UI ve 37 tam soru eklendi
+[33m8f6a9c7[m oyun modlari menusu eklendi - sadece futbol/basketbol modlari aktif
+[33mc9ca929[m akim dengelemesi: bir oyunda ayni spordan max 1-2 soru gelmesi ayarlandi
+[33md2420ab[m yeni 13 efsane soru eklendi
+[33m69adcf7[m nasil oynanir rehberi ve multiplayer aciklamasi modal olarak eklendi
+[33mb7d8fa0[m oyun icerisine neden efsane bilgi kutulari eklendi
+[33m36358b6[m premium tasarim ve courtdinates guncellemesi
+[33m749a6fa[m favicon eklendi
+[33m9a502fb[m sekme basligi courtdinates olarak guncellendi
+[33m941da23[m uygulama ismi courtdinates olarak guncellendi
+[33ma7b2bd9[m hata duzeltildi
+[33md518ef9[m beceremedim eskiye donduk
+[33mdfc69b3[m saf css premium tasarimina gecildi
+[33m0d9a388[m eski hale donduk
+[33ma48980a[m silikon vadisi premium tasarimina gecildi
+[33m0f46ecb[m ingilizce ve turkce cift dil destegi eklendi
+[33ma3cdf56[m UI yazilari profesyonellestirildi
+[33m68d77ee[m firebase ve multiplayer lobi eklendi
+[33m518bc57[m sekme ismi mapletics olarak guncellendi
+[33m7206e3c[m isim mapletics olarak degistirildi
+[33m090b3fd[m siyah ekran hatasi cozuldu 24 soru eklendi
+[33mcd99f81[m siyah ekran hatasi cozuldu 24 soru eklendi
+[33m9a80faf[m 24 soruluk master liste ve yeni fotolar tamamlandi
+[33m644b2b5[m fotoğraflar ve güncellemeler eklendi
+[33m6c51c4d[m trigger: vercel wake up
+[33mab0a890[m feat: sports time detective production release

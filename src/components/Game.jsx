@@ -34,9 +34,7 @@ function LocationPicker({ position, setPosition, hasGuessed }) {
   return position ? <Marker position={position} icon={neonIcon} /> : null;
 }
 
-// DİKKAT: Artık spesifik prop isimleri aramıyoruz, "props" nesnesinin tamamını alıyoruz!
 export default function Game(props) {
-  // Bize her zaman lazım olan temel fonksiyonları props içinden çekiyoruz
   const { playerName, language, onBackToLobby } = props;
 
   const [year, setYear] = useState(2000);
@@ -51,13 +49,12 @@ export default function Game(props) {
   const [isGameOver, setIsGameOver] = useState(false);
   const [playedCategoryName, setPlayedCategoryName] = useState("KARIŞIK MOD");
 
-  // "KAÇIŞ YOK" KATEGORİ FİLTRESİ (PROP HUNTER ALGORİTMASI)
+  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
+  const [customAlert, setCustomAlert] = useState(null);
+
   useEffect(() => {
     if (ALL_QUESTIONS && ALL_QUESTIONS.length > 0) {
-      // Game bileşenine gelen BÜTÜN verileri devasa bir string'e çevirip küçük harf yapıyoruz.
-      // App.jsx'te değişkenin adını ne koyarsan koy, içindeki değeri %100 yakalayacak.
       const allIncomingData = JSON.stringify(props).toLowerCase();
-      
       let filteredPool = ALL_QUESTIONS;
       let isMixedMode = false;
 
@@ -78,7 +75,6 @@ export default function Game(props) {
         setPlayedCategoryName("KARIŞIK MOD");
       }
 
-      // Eğer seçilen branşta hiç soru yoksa veya Karışık Mod ise:
       if (isMixedMode || filteredPool.length === 0) {
         const shuffled = [...ALL_QUESTIONS].sort(() => 0.5 - Math.random());
         const selected = [];
@@ -94,13 +90,11 @@ export default function Game(props) {
         }
         setGameQuestions(selected);
       } else {
-        // Tek Branş Modu: O branştaki soruları karıştır ve 5 tane al
         const shuffledFiltered = [...filteredPool].sort(() => 0.5 - Math.random());
         setGameQuestions(shuffledFiltered.slice(0, 5));
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Sadece ilk yüklendiğinde çalışsın
+  }, []);
 
   const t = language === 'tr' ? {
     round: `RAUNT ${currentRound}/5`,
@@ -108,38 +102,46 @@ export default function Game(props) {
     back: "LOBİYE DÖN",
     mapTarget: "KONUM SEÇ",
     timeline: "YILI BELİRLE",
-    guess: "TAHMİN ET",
+    guess: "TAHMİNİ ONAYLA",
     next: "SONRAKİ RAUNT ➔",
     finish: "SONUÇLARI GÖR",
     missingGuess: "Lütfen önce haritadan bir konum seçin!",
     zoomHint: "🔍 Büyütmek için tıkla",
-    resultDistance: "Mesafe Farkı",
+    resultDistance: "Mesafe",
     resultYear: "Yıl Farkı",
     resultPoints: "Kazanılan Puan",
     loading: "Efsane Anlar Yükleniyor...",
     gameOverTitle: "OYUN TAMAMLANDI",
     totalScore: "TOPLAM SKOR",
     share: "SKORU PAYLAŞ",
-    copied: "Kopyalandı!"
+    copied: "Kopyalandı!",
+    openMap: "🗺️ HARİTAYI AÇ",
+    mapSelected: "📍 KONUM SEÇİLDİ",
+    closeMap: "KAPAT",
+    confirmLocation: "KONUMU ONAYLA",
   } : {
     round: `ROUND ${currentRound}/5`,
     scoreTitle: `SCORE: ${score}`,
     back: "BACK TO LOBBY",
     mapTarget: "PIN LOCATION",
     timeline: "SELECT YEAR",
-    guess: "MAKE GUESS",
+    guess: "CONFIRM GUESS",
     next: "NEXT ROUND ➔",
     finish: "SEE RESULTS",
     missingGuess: "Please select a location on the map first!",
     zoomHint: "🔍 Click to zoom",
     resultDistance: "Distance",
-    resultYear: "Year Difference",
+    resultYear: "Year Diff",
     resultPoints: "Points Earned",
     loading: "Loading Epic Moments...",
     gameOverTitle: "GAME OVER",
     totalScore: "TOTAL SCORE",
     share: "SHARE SCORE",
-    copied: "Copied!"
+    copied: "Copied!",
+    openMap: "🗺️ OPEN MAP",
+    mapSelected: "📍 LOCATION PINNED",
+    closeMap: "CLOSE",
+    confirmLocation: "CONFIRM LOCATION",
   };
 
   const [shareText, setShareText] = useState(t.share);
@@ -157,7 +159,11 @@ export default function Game(props) {
   const currentSportLabel = language === 'tr' ? currentQ?.sport?.tr : currentQ?.sport?.en;
 
   const handleGuess = () => {
-    if (!selectedPosition) { alert(t.missingGuess); return; }
+    if (!selectedPosition) { 
+      setCustomAlert(t.missingGuess);
+      setTimeout(() => setCustomAlert(null), 3000); 
+      return; 
+    }
     const distanceKm = getDistance(selectedPosition.lat, selectedPosition.lng, currentQ.lat, currentQ.lng);
     const yearDiff = Math.abs(currentQ.year - year);
     
@@ -198,7 +204,6 @@ export default function Game(props) {
     setTimeout(() => setShareText(t.share), 2000);
   };
 
-  // ---------------- OYUN BİTİŞ EKRANI (cillop gibi fixli) ----------------
   if (isGameOver) {
     return (
       <div style={{ width: '100%', minHeight: '100vh', backgroundColor: '#050508', color: 'white', fontFamily: 'system-ui', padding: '40px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto' }}>
@@ -234,116 +239,217 @@ export default function Game(props) {
   }
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100vh', backgroundColor: '#050508', overflow: 'hidden', color: 'white', fontFamily: 'system-ui, -apple-system, sans-serif', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100%', backgroundColor: '#050508', overflow: 'hidden', color: 'white', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
       
+      {/* --- MÜKEMMEL CSS (BUTONLAR VE 50/50 LAYOUT) --- */}
       <style>{`
-        .vignette-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 15%, transparent 70%, rgba(0,0,0,0.85) 100%); pointer-events: none; }
-        .hud-glass { background: rgba(10, 10, 15, 0.55); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        /* Kaydırma çubuğunu gizle ama kaydırmaya izin ver */
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+        
+        .vignette-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 15%, transparent 70%, rgba(0,0,0,0.9) 100%); pointer-events: none; z-index: 1; }
+        .hud-glass { background: rgba(10, 10, 15, 0.65); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        @keyframes slideDown { from { top: -50px; opacity: 0; } to { top: 20px; opacity: 1; } }
+        
+        /* PREMIUM BUTONLAR */
+        .btn-primary {
+          background: linear-gradient(135deg, rgba(34,197,94,0.2) 0%, rgba(21,128,61,0.5) 100%);
+          border: 1px solid #4ade80;
+          color: #fff;
+          font-weight: 900;
+          letter-spacing: 2px;
+          text-transform: uppercase;
+          padding: 16px 20px;
+          border-radius: 12px;
+          cursor: pointer;
+          box-shadow: 0 4px 20px rgba(34,197,94,0.2);
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          display: flex; justify-content: center; align-items: center; text-align: center;
+        }
+        .btn-primary:hover {
+          box-shadow: 0 6px 30px rgba(34,197,94,0.4);
+          transform: translateY(-2px);
+          background: linear-gradient(135deg, rgba(34,197,94,0.3) 0%, rgba(21,128,61,0.7) 100%);
+        }
+
+        .btn-secondary {
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.2);
+          color: white;
+          font-weight: 800;
+          letter-spacing: 1px;
+          padding: 16px 20px;
+          border-radius: 12px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex; justify-content: center; align-items: center; text-align: center;
+        }
+        .btn-secondary:hover {
+          background: rgba(255,255,255,0.1);
+          border-color: rgba(255,255,255,0.4);
+        }
+        .btn-secondary.selected {
+          background: rgba(251, 191, 36, 0.15); /* Theme Gold */
+          border-color: #f59e0b;
+          color: #fcd34d;
+        }
+
+        /* DİNAMİK 50/50 BÖLÜNME LAYOUT'U */
+        .main-content {
+          flex: 1; display: flex; flex-direction: column; width: 95%; max-width: 1400px; margin: 0 auto; gap: 16px; min-height: 0; padding-bottom: 16px; position: relative; z-index: 10;
+        }
+        
+        .split-layout { display: flex; flex-direction: column; gap: 16px; flex: 1; min-height: 0; }
+        .split-half { flex: 1; display: flex; flex-direction: column; gap: 16px; min-height: 0; }
+        
+        /* Bilgisayarda yan yana %50 %50 yap */
+        @media (min-width: 900px) {
+          .split-layout { flex-direction: row; }
+          .split-half { width: 50%; }
+        }
       `}</style>
 
+      {/* ⚠️ MODERN UYARI BİLDİRİMİ (TOAST) */}
+      {customAlert && (
+        <div style={{ position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 300, backgroundColor: 'rgba(220,38,38,0.95)', color: 'white', padding: '12px 24px', borderRadius: '30px', fontWeight: 'bold', boxShadow: '0 10px 25px rgba(220,38,38,0.5)', border: '1px solid #f87171', animation: 'slideDown 0.3s ease-out', backdropFilter: 'blur(10px)', letterSpacing: '1px' }}>
+          ⚠️ {customAlert}
+        </div>
+      )}
+
+      {/* Arka Plan Flu Foto */}
       <div style={{ position: 'absolute', inset: 0, zIndex: 0, backgroundImage: `url('${currentQ.localPhotoUrl}')`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'blur(50px) brightness(20%)', transform: 'scale(1.1)', transition: 'background-image 0.5s ease' }}></div>
       <div className="vignette-overlay"></div>
 
-      <div className="hud-glass" style={{ position: 'relative', zIndex: 10, width: '95%', maxWidth: '1600px', margin: '16px auto 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 32px', borderRadius: '16px' }}>
-        <button onClick={onBackToLobby} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: '13px', fontWeight: '800', letterSpacing: '1px' }}>← {t.back}</button>
+      {/* Üst Bar (HUD) */}
+      <div className="hud-glass" style={{ position: 'relative', zIndex: 10, width: '95%', maxWidth: '1400px', margin: '16px auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 24px', borderRadius: '16px', flexShrink: 0 }}>
+        <button onClick={onBackToLobby} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: '13px', fontWeight: '800', letterSpacing: '1px', transition: 'color 0.2s' }} onMouseOver={(e)=>e.target.style.color='white'} onMouseOut={(e)=>e.target.style.color='rgba(255,255,255,0.6)'}>← {t.back}</button>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <span style={{ fontSize: '11px', color: '#4ade80', fontWeight: '900', letterSpacing: '3px' }}>{t.round}</span>
           <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
             {[1, 2, 3, 4, 5].map(i => (
-              <div key={i} style={{ width: '40px', height: '4px', borderRadius: '2px', backgroundColor: i <= currentRound ? '#22c55e' : 'rgba(255,255,255,0.15)', boxShadow: i <= currentRound ? '0 0 10px rgba(34,197,94,0.5)' : 'none' }}></div>
+              <div key={i} style={{ width: '30px', height: '4px', borderRadius: '2px', backgroundColor: i <= currentRound ? '#22c55e' : 'rgba(255,255,255,0.15)', boxShadow: i <= currentRound ? '0 0 10px rgba(34,197,94,0.5)' : 'none' }}></div>
             ))}
           </div>
         </div>
-        <div style={{ fontSize: '22px', fontWeight: '900', letterSpacing: '1px', display: 'flex', gap: '8px' }}>
-          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', alignSelf: 'center' }}>{t.scoreTitle.split(':')[0]}</span> 
+        <div style={{ fontSize: '20px', fontWeight: '900', letterSpacing: '1px', display: 'flex', gap: '8px', color: '#fbbf24' }}>
+          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', alignSelf: 'center' }}>{t.scoreTitle.split(':')[0]}</span> 
           {t.scoreTitle.split(':')[1]}
         </div>
       </div>
 
-      {/* STANDART BOYUTLU FOTOĞRAF ALANI */}
-      <div style={{ position: 'relative', zIndex: 10, flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
-        <div onClick={() => setIsZoomed(true)} style={{ 
-          position: 'relative', width: '100%', height: '100%', maxHeight: '52vh', aspectRatio: '16/9',
-          borderRadius: '16px', overflow: 'hidden', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.15)', 
-          boxShadow: '0 25px 50px rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' 
-        }}>
-          <div style={{ position: 'absolute', inset: 0, backgroundImage: `url('${currentQ.localPhotoUrl}')`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'blur(20px) brightness(40%)', zIndex: 1 }}></div>
-          <img src={currentQ.localPhotoUrl} alt={currentQ.title} style={{ position: 'relative', zIndex: 2, maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-          
-          <div style={{ position: 'absolute', top: '16px', left: '16px', zIndex: 10, background: 'rgba(0,0,0,0.65)', border: '1px solid rgba(34,197,94,0.4)', padding: '6px 14px', borderRadius: '8px', color: '#4ade80', fontWeight: '800', fontSize: '11px', letterSpacing: '1px', backdropFilter: 'blur(5px)' }}>
-            {currentSportLabel?.toUpperCase()}
-          </div>
-          
-          <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: '0.2s', zIndex: 3 }} onMouseOver={(e) => e.currentTarget.style.opacity = 1} onMouseOut={(e) => e.currentTarget.style.opacity = 0}>
-            <span style={{ backgroundColor: 'rgba(0,0,0,0.8)', padding: '10px 24px', borderRadius: '30px', fontWeight: '700', letterSpacing: '1px' }}>{t.zoomHint}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="hud-glass" style={{ position: 'relative', zIndex: 10, width: '95%', maxWidth: '1600px', margin: '0 auto 16px', display: 'flex', gap: '20px', padding: '16px', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+      {/* ANA İÇERİK ALANI (Taşmayı engelleyen kapsayıcı) */}
+      <div className="main-content">
         
-        <div style={{ flex: '2', backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ padding: '8px 16px', backgroundColor: 'rgba(255,255,255,0.03)', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '11px', fontWeight: '800', letterSpacing: '2px', color: 'rgba(255,255,255,0.8)', zIndex: 400 }}>
-            📍 {t.mapTarget}
-          </div>
-          <div style={{ flex: 1, minHeight: '240px', position: 'relative' }}>
-            <MapContainer key={`map-${currentRound}`} center={[20, 0]} zoom={2} style={{ height: '100%', width: '100%' }} zoomControl={false}>
-              <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
-              <LocationPicker position={selectedPosition} setPosition={setSelectedPosition} hasGuessed={hasGuessed} />
-              {hasGuessed && <Marker position={[currentQ.lat, currentQ.lng]} icon={targetIcon} />}
-              {hasGuessed && selectedPosition && <Polyline positions={[selectedPosition, [currentQ.lat, currentQ.lng]]} color="#ef4444" dashArray="5, 10" weight={3} />}
-            </MapContainer>
-          </div>
-        </div>
-
-        <div style={{ flex: '1.2', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {!hasGuessed ? (
-            <>
-              <div style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', padding: '16px 20px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '24px' }}>
-                  <div style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '2px', color: 'rgba(255,255,255,0.6)' }}>⏳ {t.timeline}</div>
-                  <div style={{ fontSize: '40px', fontWeight: '900', color: '#22c55e', textShadow: '0 0 30px rgba(34,197,94,0.4)', lineHeight: '1' }}>{year}</div>
-                </div>
-                <input type="range" min="1950" max="2026" value={year} onChange={(e) => setYear(Number(e.target.value))} style={{ WebkitAppearance: 'none', width: '100%', height: '6px', borderRadius: '3px', background: 'rgba(255,255,255,0.1)', outline: 'none', cursor: 'pointer' }} />
+        {!hasGuessed ? (
+          // DURUM 1: TAHMİN ÖNCESİ (Büyük Fotoğraf + Alt Kontroller)
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '16px', minHeight: 0 }}>
+            {/* Fotoğraf Alanı */}
+            <div onClick={() => setIsZoomed(true)} style={{ flex: 1, minHeight: 0, borderRadius: '20px', overflow: 'hidden', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ position: 'absolute', inset: 0, backgroundImage: `url('${currentQ.localPhotoUrl}')`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'blur(15px) brightness(40%)', zIndex: 1 }}></div>
+              <img src={currentQ.localPhotoUrl} alt={currentQ.title} style={{ position: 'relative', zIndex: 2, maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+              <div style={{ position: 'absolute', top: '16px', left: '16px', zIndex: 10, background: 'rgba(0,0,0,0.65)', border: '1px solid rgba(34,197,94,0.4)', padding: '6px 14px', borderRadius: '8px', color: '#4ade80', fontWeight: '800', fontSize: '11px', letterSpacing: '1px', backdropFilter: 'blur(5px)' }}>{currentSportLabel?.toUpperCase()}</div>
+              <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: '0.2s', zIndex: 3 }} onMouseOver={(e) => e.currentTarget.style.opacity = 1} onMouseOut={(e) => e.currentTarget.style.opacity = 0}>
+                <span style={{ backgroundColor: 'rgba(0,0,0,0.8)', padding: '10px 24px', borderRadius: '30px', fontWeight: '700', letterSpacing: '1px' }}>{t.zoomHint}</span>
               </div>
-              <button onClick={handleGuess} style={{ width: '100%', padding: '16px', fontSize: '15px', fontWeight: '900', background: 'linear-gradient(180deg, #22c55e 0%, #15803d 100%)', color: 'white', border: '1px solid #4ade80', borderRadius: '12px', cursor: 'pointer', boxShadow: '0 10px 25px rgba(21, 128, 61, 0.4)', letterSpacing: '2px' }}>
-                {t.guess}
-              </button>
-            </>
-          ) : (
-            <>
-              <div style={{ flex: 1, backgroundColor: 'rgba(34, 197, 94, 0.03)', borderRadius: '12px', border: '1px solid rgba(34, 197, 94, 0.2)', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto', maxHeight: '180px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-                  <span style={{ color: 'rgba(255,255,255,0.5)' }}>{t.resultDistance}:</span>
-                  <span style={{ fontWeight: 'bold', color: '#fff' }}>{roundResult.distance} km</span>
+            </div>
+
+            {/* Alt Kontrol Paneli */}
+            <div className="hud-glass" style={{ padding: '20px 24px', borderRadius: '20px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {/* Yıl Slider */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                  <div style={{ fontSize: '12px', fontWeight: '800', letterSpacing: '2px', color: 'rgba(255,255,255,0.6)' }}>⏳ {t.timeline}</div>
+                  <div style={{ fontSize: '36px', fontWeight: '900', color: '#22c55e', textShadow: '0 0 20px rgba(34,197,94,0.4)', lineHeight: '1' }}>{year}</div>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-                  <span style={{ color: 'rgba(255,255,255,0.5)' }}>{t.resultYear}:</span>
-                  <span style={{ fontWeight: 'bold', color: '#fff' }}>{roundResult.yearDiff} Yıl (Doğru: {currentQ.year})</span>
+                <input type="range" min="1950" max="2026" value={year} onChange={(e) => setYear(Number(e.target.value))} style={{ WebkitAppearance: 'none', width: '100%', height: '6px', borderRadius: '3px', background: 'rgba(255,255,255,0.2)', outline: 'none', cursor: 'pointer' }} />
+              </div>
+              {/* Aksiyon Butonları */}
+              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                <button onClick={() => setIsMapModalOpen(true)} className={`btn-secondary ${selectedPosition ? 'selected' : ''}`} style={{ flex: '1 1 200px' }}>
+                  {selectedPosition ? t.mapSelected : t.openMap}
+                </button>
+                <button onClick={handleGuess} className="btn-primary" style={{ flex: '1 1 200px' }}>
+                  {t.guess}
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          // DURUM 2: TAHMİN SONRASI (50/50 SPLIT SCREEN)
+          <div className="split-layout">
+            
+            {/* SOL YARI: FOTOĞRAF VE BİLGİ KUTUSU */}
+            <div className="split-half">
+              <div style={{ flex: 1, minHeight: 0, borderRadius: '20px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.5)' }}>
+                <img src={currentQ.localPhotoUrl} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+              </div>
+              
+              <div className="hud-glass" style={{ padding: '20px', borderRadius: '20px', flexShrink: 0, border: '1px solid rgba(34,197,94,0.3)', background: 'rgba(21,128,61,0.05)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '12px', marginBottom: '12px' }}>
+                  <div>
+                    <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', marginBottom: '4px' }}>{t.resultDistance}: <strong style={{color:'#fff'}}>{roundResult.distance} km</strong></div>
+                    <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)' }}>{t.resultYear}: <strong style={{color:'#fff'}}>{roundResult.yearDiff} Yıl <span style={{fontSize:'11px', opacity:0.6}}>(Doğru: {currentQ.year})</span></strong></div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: '11px', color: '#fbbf24', letterSpacing: '1px', fontWeight: 'bold' }}>{t.resultPoints}</div>
+                    <div style={{ fontSize: '24px', fontWeight: '900', color: '#f59e0b', textShadow: '0 0 15px rgba(245,158,11,0.3)' }}>+{roundResult.points}</div>
+                  </div>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '6px', color: '#fbbf24', fontWeight: 'bold' }}>
-                  <span>{t.resultPoints}:</span>
-                  <span>+{roundResult.points} Puan</span>
-                </div>
-                <div style={{ fontSize: '11px', lineHeight: '1.4', color: 'rgba(255,255,255,0.8)' }}>
-                  <strong style={{ color: '#3b82f6', display: 'block', marginBottom: '2px' }}>💡 BUNU BİLİYOR MUYDUNUZ?</strong>
+                <div style={{ fontSize: '13px', lineHeight: '1.6', color: 'rgba(255,255,255,0.85)' }}>
+                  <strong style={{ color: '#4ade80', display: 'block', marginBottom: '4px', letterSpacing: '1px' }}>💡 BUNU BİLİYOR MUYDUNUZ?</strong>
                   {currentTrivia}
                 </div>
               </div>
-              <button onClick={handleNextRound} style={{ width: '100%', padding: '16px', fontSize: '15px', fontWeight: '900', background: 'linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%)', color: 'white', border: '1px solid #60a5fa', borderRadius: '12px', cursor: 'pointer', boxShadow: '0 10px 25px rgba(29, 78, 216, 0.4)', letterSpacing: '2px' }}>
+            </div>
+
+            {/* SAĞ YARI: HARİTA VE SONRAKİ RAUNT BUTONU */}
+            <div className="split-half">
+              <div style={{ flex: 1, minHeight: 0, borderRadius: '20px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)', position: 'relative' }}>
+                <MapContainer key={`result-map-${currentRound}`} center={[currentQ.lat, currentQ.lng]} zoom={3} style={{ height: '100%', width: '100%' }} zoomControl={true}>
+                  <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
+                  {selectedPosition && <Marker position={selectedPosition} icon={neonIcon} />}
+                  <Marker position={[currentQ.lat, currentQ.lng]} icon={targetIcon} />
+                  {selectedPosition && <Polyline positions={[selectedPosition, [currentQ.lat, currentQ.lng]]} color="#ef4444" dashArray="5, 10" weight={3} />}
+                </MapContainer>
+              </div>
+              
+              <button onClick={handleNextRound} className="btn-primary" style={{ flexShrink: 0, padding: '20px', fontSize: '16px' }}>
                 {currentRound < 5 ? t.next : t.finish}
               </button>
-            </>
-          )}
-        </div>
+            </div>
+            
+          </div>
+        )}
       </div>
 
-      {isZoomed && (
-        <div onClick={() => setIsZoomed(false)} style={{ position: 'fixed', inset: 0, zIndex: 150, backgroundColor: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'zoom-out' }}>
-          <img src={currentQ.localPhotoUrl} alt="Zoomed" style={{ maxWidth: '92vw', maxHeight: '92vh', objectFit: 'contain', borderRadius: '8px' }} />
-          <div style={{ position: 'absolute', top: '24px', right: '32px', color: 'rgba(255,255,255,0.5)', fontSize: '32px', fontWeight: '300' }}>×</div>
+      {/* 🗺️ HARİTA MODALI (SADECE TAHMİN YAPARKEN AÇILIR) */}
+      {isMapModalOpen && !hasGuessed && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 200, backgroundColor: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(10px)', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)', backgroundColor: '#050508' }}>
+            <div style={{ color: '#4ade80', fontWeight: '900', letterSpacing: '2px', fontSize: '16px' }}>{t.mapTarget}</div>
+            <button onClick={() => setIsMapModalOpen(false)} className="btn-secondary" style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '13px' }}>✕ {t.closeMap}</button>
+          </div>
+          <div style={{ flex: 1, position: 'relative' }}>
+            <MapContainer key={`modal-map-${currentRound}`} center={selectedPosition || [20, 0]} zoom={2} style={{ height: '100%', width: '100%' }} zoomControl={false}>
+              <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
+              <LocationPicker position={selectedPosition} setPosition={setSelectedPosition} hasGuessed={hasGuessed} />
+            </MapContainer>
+          </div>
+          <div style={{ padding: '24px', borderTop: '1px solid rgba(255,255,255,0.1)', backgroundColor: '#050508' }}>
+            <button onClick={() => setIsMapModalOpen(false)} className="btn-primary" style={{ width: '100%' }}>
+              {t.confirmLocation}
+            </button>
+          </div>
         </div>
       )}
+
+      {/* 🔍 FOTOĞRAF ZOOM MODALI */}
+      {isZoomed && (
+        <div onClick={() => setIsZoomed(false)} style={{ position: 'fixed', inset: 0, zIndex: 250, backgroundColor: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(15px)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'zoom-out' }}>
+          <img src={currentQ.localPhotoUrl} alt="Zoomed" style={{ maxWidth: '95vw', maxHeight: '95vh', objectFit: 'contain', borderRadius: '12px' }} />
+          <div style={{ position: 'absolute', top: '24px', right: '32px', color: 'rgba(255,255,255,0.5)', fontSize: '40px', fontWeight: '300' }}>×</div>
+        </div>
+      )}
+      
     </div>
   );
 }
