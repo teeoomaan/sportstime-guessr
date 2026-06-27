@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import Landing from './components/Landing';
 import Lobby from './components/Lobby'; 
 import Game from './components/Game';
-import { db } from './firebase'; 
+// YENİ: Auth importları eklendi
+import { db, auth, googleProvider } from './firebase'; 
 import { doc, setDoc, getDoc, updateDoc, onSnapshot } from 'firebase/firestore';
+import { signInWithPopup, signInAnonymously } from 'firebase/auth'; 
 import { ALL_QUESTIONS } from './data/questions'; 
 
 export default function App() {
@@ -15,6 +17,53 @@ export default function App() {
   const [roomData, setRoomData] = useState(null);
   const [isHost, setIsHost] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null); 
+
+  // --------------------------------------------------
+  // 🚀 YENİ: GOOGLE GİRİŞ SİSTEMİ
+  // --------------------------------------------------
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      
+      // Oyuncu ilk kez mi giriyor diye veritabanını kontrol et
+      const userRef = doc(db, 'users', user.uid);
+      const userSnap = await getDoc(userRef);
+      
+      if (!userSnap.exists()) {
+        // Yeni oyuncuya 1000 ELO vererek kaydet
+        await setDoc(userRef, {
+          name: user.displayName,
+          email: user.email,
+          elo: 1000,
+          isGuest: false,
+          createdAt: new Date()
+        });
+      }
+      
+      setPlayerName(user.displayName);
+      setStep('lobby'); 
+    } catch (error) {
+      console.error("Google Giriş Hatası:", error);
+      alert(language === 'tr' ? "Giriş yapılamadı, lütfen tekrar dene." : "Login failed, please try again.");
+    }
+  };
+
+  // --------------------------------------------------
+  // 🚀 YENİ: MİSAFİR GİRİŞ SİSTEMİ
+  // --------------------------------------------------
+  const handleGuestLogin = async (guestName) => {
+    try {
+      // Firebase'den anonim giriş al
+      await signInAnonymously(auth);
+      setPlayerName(guestName);
+      setStep('lobby'); 
+    } catch (error) {
+      console.error("Misafir Giriş Hatası:", error);
+      alert(language === 'tr' ? "Giriş yapılamadı, lütfen tekrar dene." : "Login failed, please try again.");
+    }
+  };
+  // --------------------------------------------------
 
   const handleSinglePlayer = (category) => {
     setSelectedCategory(category);
@@ -126,7 +175,15 @@ export default function App() {
   };
 
   if (step === 'landing') {
-    return <Landing language={language} setLanguage={setLanguage} onProceed={(name) => { setPlayerName(name); setStep('lobby'); }} />;
+    // 🎯 YENİ: Landing'e Google ve Guest fonksiyonlarını gönderiyoruz
+    return (
+      <Landing 
+        language={language} 
+        setLanguage={setLanguage} 
+        onGoogleLogin={handleGoogleLogin} 
+        onGuestLogin={handleGuestLogin} 
+      />
+    );
   }
 
   if (step === 'lobby') {
@@ -145,7 +202,7 @@ export default function App() {
       <Game 
         playerName={playerName} language={language} selectedCategory={selectedCategory}
         roomCode={roomCode} isHost={isHost}
-        roomData={roomData} // 🎯 Tüm oda verisini direkt gönderiyoruz
+        roomData={roomData} 
         onBackToLobby={() => { setStep('lobby'); setRoomCode(null); setRoomData(null); }} 
       />
     );

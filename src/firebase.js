@@ -1,7 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
-// İleride veritabanı (Firestore) ve giriş (Auth) işlemlerini buradan yöneteceğiz.
+import { getAuth, GoogleAuthProvider } from "firebase/auth"; // İkisi tek satırda birleşti
 
 const firebaseConfig = {
   apiKey: "AIzaSyDqR_PnpJDyMwAq_JTR28jNCYMW3KRMuh8",
@@ -17,3 +16,4 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
+export const googleProvider = new GoogleAuthProvider();
