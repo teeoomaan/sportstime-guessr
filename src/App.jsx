@@ -2,13 +2,22 @@ import React, { useState, useEffect } from 'react';
 import Landing from './components/Landing';
 import Lobby from './components/Lobby'; 
 import Game from './components/Game';
-// YENİ: Auth importları eklendi
+// Auth importları eklendi
 import { db, auth, googleProvider } from './firebase'; 
 import { doc, setDoc, getDoc, updateDoc, onSnapshot } from 'firebase/firestore';
 import { signInWithPopup, signInAnonymously } from 'firebase/auth'; 
 import { ALL_QUESTIONS } from './data/questions'; 
+import Privacy from './Privacy';
 
 export default function App() {
+  // --------------------------------------------------
+  // 🚀 YENİ: ADSENSE GİZLİLİK SAYFASI YÖNLENDİRMESİ
+  // Eğer linkte /privacy varsa oyun motorunu hiç başlatmadan direkt o sayfayı renderla.
+  // --------------------------------------------------
+  if (window.location.pathname === '/privacy') {
+    return <Privacy />;
+  }
+
   const [step, setStep] = useState('landing'); 
   const [language, setLanguage] = useState('tr');
   const [playerName, setPlayerName] = useState('');
@@ -19,7 +28,7 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState(null); 
 
   // --------------------------------------------------
-  // 🚀 YENİ: GOOGLE GİRİŞ SİSTEMİ
+  // 🚀 GOOGLE GİRİŞ SİSTEMİ
   // --------------------------------------------------
   const handleGoogleLogin = async () => {
     try {
@@ -50,7 +59,7 @@ export default function App() {
   };
 
   // --------------------------------------------------
-  // 🚀 YENİ: MİSAFİR GİRİŞ SİSTEMİ
+  // 🚀 MİSAFİR GİRİŞ SİSTEMİ
   // --------------------------------------------------
   const handleGuestLogin = async (guestName) => {
     try {
@@ -175,7 +184,6 @@ export default function App() {
   };
 
   if (step === 'landing') {
-    // 🎯 YENİ: Landing'e Google ve Guest fonksiyonlarını gönderiyoruz
     return (
       <Landing 
         language={language} 
